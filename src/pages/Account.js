@@ -67,7 +67,7 @@ export default function Account() {
 	// get data from API with fetch
 	useEffect(() => {
 		(async function () {
-			const json = await fetch('http://localhost:3001/user/me',
+			const json = await fetch('https://pronounce1.herokuapp.com/user/me',
 				{
 					method: 'GET',
 					headers: {
@@ -103,7 +103,7 @@ export default function Account() {
 		const data = new FormData();
 		data.append('image', e.target.files[0]);
 
-		const picture = await fetch(`http://localhost:3001/picture`,
+		const picture = await fetch(`https://pronounce1.herokuapp.com/picture`,
 			{
 				method: 'PUT',
 				headers: {
@@ -112,7 +112,7 @@ export default function Account() {
 				body: data
 			})
 			.then(() => {
-				return fetch(`http://localhost:3001/picture/me`,
+				return fetch(`https://pronounce1.herokuapp.com/picture/me`,
 					{
 						method: 'GET',
 						headers: {
@@ -134,7 +134,7 @@ export default function Account() {
 			.then(res => res.blob())
 			.then(blob => data.append('file', blob));
 
-		const audio = await fetch(`http://localhost:3001/audio`,
+		const audio = await fetch(`https://pronounce1.herokuapp.com/audio`,
 			{
 				method: 'PUT',
 				headers: {
@@ -145,7 +145,7 @@ export default function Account() {
 			.then((res) => {
 				if (res.ok) {
 					handleDeleteAudio();
-					return fetch(`http://localhost:3001/audio/me`,
+					return fetch(`https://pronounce1.herokuapp.com/audio/me`,
 						{
 							method: 'GET',
 							headers: {
