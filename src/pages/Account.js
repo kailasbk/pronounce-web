@@ -75,8 +75,22 @@ export default function Account() {
 					}
 				})
 				.then(res => res.json());
-			const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
-			const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' })
+
+			const picture;
+			if (json.picture !== null) {
+				picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
+			}
+			else {
+				picture = new Blob();
+			}
+
+			const audio;
+			if (json.audio !== null) {
+				audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
+			}
+			else {
+				audio = new Blob();
+			}
 
 			const newInfo = {
 				username: json.username,
