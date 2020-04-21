@@ -29,7 +29,6 @@ function App() {
 				<Route>
 					<Switch>
 						<Route path="/" component={Home} exact />
-						<Route path="/about" component={About} />
 						<Route path="/account" component={Account} />
 						<Route path="/invite" component={Invite} />
 						<Route path="/group" component={Group} />
@@ -48,6 +47,7 @@ function App() {
 					<Switch>
 						<Route path="/register" component={Register} />
 						<Route path="/login" component={Login} />
+						<Route path="/about" component={About} />
 						<ProtectedRoutes />
 					</Switch>
 				</Container>
