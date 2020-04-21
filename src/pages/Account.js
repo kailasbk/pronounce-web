@@ -76,7 +76,7 @@ export default function Account() {
 				})
 				.then(res => res.json());
 
-			const picture;
+			let picture;
 			if (json.picture !== null) {
 				picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
 			}
@@ -84,7 +84,7 @@ export default function Account() {
 				picture = new Blob();
 			}
 
-			const audio;
+			let audio;
 			if (json.audio !== null) {
 				audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
 			}
