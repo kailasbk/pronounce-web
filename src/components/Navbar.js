@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Container, Button, IconButton, Typography, makeStyles } from '@material-ui/core';
-import { InfoOutlined, HomeOutlined, AccountCircleOutlined, AddOutlined } from '@material-ui/icons'
+import { InfoOutlined, HomeOutlined, AccountCircleOutlined, AddOutlined, PeopleAltOutlined } from '@material-ui/icons'
 
 const useStyles = makeStyles(theme => ({
 	navbarSpacer: {
@@ -23,14 +23,18 @@ const useStyles = makeStyles(theme => ({
 export default function Navbar() {
 	const styles = useStyles();
 
+	function Dot() {
+		return <span style={{ display: 'inline-block', height: '4px', width: '4px', borderRadius: '2px', border: '2px solid white', margin: '2px' }}> </span>;
+	}
+
 	return (
 		<AppBar position="static">
 			<Container maxWidth='md'>
 				<Toolbar disableGutters>
 					<Link to="/">
 						<Button className={styles.title}>
-							<Typography variant="h5">
-								Pronounce.IO
+							<Typography variant="h5" style={{ display: 'flex', alignItems: 'center' }}>
+								pro <Dot /> noun <Dot /> cit
 							</Typography>
 						</Button>
 					</Link>
@@ -39,6 +43,11 @@ export default function Navbar() {
 						<Link to="/">
 							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
 								<HomeOutlined fontSize="inherit" color="inherit" />
+							</IconButton>
+						</Link>
+						<Link to="/group">
+							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
+								<PeopleAltOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
 						<Link to="/invite">
