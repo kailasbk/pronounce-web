@@ -75,23 +75,7 @@ export default function Account() {
 					}
 				})
 				.then(res => res.json());
-
-			let picture;
-			if (json.picture !== null) {
-				picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
-			}
-			else {
-				picture = new Blob();
-			}
-
-			let audio;
-			if (json.audio !== null) {
-				audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
-			}
-			else {
-				audio = new Blob();
-			}
-
+      
 			const newInfo = {
 				username: json.username,
 				firstname: json.firstname,
@@ -101,10 +85,13 @@ export default function Account() {
 				audiosrc: ''
 			}
 
-			if (picture.size > 0) {
+			if (json.picture !== null) {
+				const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
 				newInfo.picturesrc = URL.createObjectURL(picture);
 			}
-			if (audio.size > 0) {
+
+			if (json.audio !== null) {
+				const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
 				newInfo.audiosrc = URL.createObjectURL(audio);
 			}
 
@@ -189,7 +176,7 @@ export default function Account() {
 
 	function handleAudio(e) {
 		if (info.audiosrc !== '' || preview !== '') {
-			let audio = document.getElementById('pronounciation');
+			const audio = document.getElementById('pronounciation');
 			if (isPlaying) {
 				audio.pause();
 				audio.currentTime = 0;
@@ -273,7 +260,11 @@ export default function Account() {
 			<Divider />
 			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<Typography style={{ flexGrow: 3, flexBasis: '60%' }}> Pronouncation: </Typography>
-				<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={(preview === '') ? info.audiosrc : preview} />
+				{info.audiosrc !== '' ?
+					<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={(preview === '') ? info.audiosrc : preview} />
+					:
+					<> </>
+				}
 				<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '40%', flexGrow: 2 }}>
 					<Button style={{ width: '50%' }} color={info.audiosrc !== '' || preview !== '' ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>
 						{isPlaying ? <Stop /> : <PlayArrow />}
