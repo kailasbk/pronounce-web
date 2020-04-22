@@ -67,7 +67,7 @@ export default function Account() {
 	// get data from API with fetch
 	useEffect(() => {
 		(async function () {
-			const json = await fetch('https://pronounce1.herokuapp.com/user/me',
+			const json = await fetch('https://pronouncit.herokuapp.com/user/me',
 				{
 					method: 'GET',
 					headers: {
@@ -75,7 +75,7 @@ export default function Account() {
 					}
 				})
 				.then(res => res.json());
-      
+
 			const newInfo = {
 				username: json.username,
 				firstname: json.firstname,
@@ -104,7 +104,7 @@ export default function Account() {
 		const data = new FormData();
 		data.append('image', e.target.files[0]);
 
-		const picture = await fetch(`https://pronounce1.herokuapp.com/picture`,
+		const picture = await fetch(`https://pronouncit.herokuapp.com/picture`,
 			{
 				method: 'PUT',
 				headers: {
@@ -113,7 +113,7 @@ export default function Account() {
 				body: data
 			})
 			.then(() => {
-				return fetch(`https://pronounce1.herokuapp.com/picture/me`,
+				return fetch(`https://pronouncit.herokuapp.com/picture/me`,
 					{
 						method: 'GET',
 						headers: {
@@ -135,7 +135,7 @@ export default function Account() {
 			.then(res => res.blob())
 			.then(blob => data.append('file', blob));
 
-		const audio = await fetch(`https://pronounce1.herokuapp.com/audio`,
+		const audio = await fetch(`https://pronouncit.herokuapp.com/audio`,
 			{
 				method: 'PUT',
 				headers: {
@@ -146,7 +146,7 @@ export default function Account() {
 			.then((res) => {
 				if (res.ok) {
 					handleDeleteAudio();
-					return fetch(`https://pronounce1.herokuapp.com/audio/me`,
+					return fetch(`https://pronouncit.herokuapp.com/audio/me`,
 						{
 							method: 'GET',
 							headers: {

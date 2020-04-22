@@ -36,7 +36,7 @@ export default function Login() {
 			username: username,
 			password: password
 		}
-		fetch('https://pronounce1.herokuapp.com/user/login', {
+		fetch('https://pronouncit.herokuapp.com/user/login', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

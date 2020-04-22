@@ -70,7 +70,7 @@ export default function Group() {
 	const styles = useStyles();
 
 	useEffect(() => {
-		fetch('http://localhost:3001/group/all',
+		fetch('https://pronouncit.herokuapp.com/group/all',
 			{
 				method: 'GET',
 				headers: {
