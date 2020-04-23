@@ -33,7 +33,7 @@ export default function Navbar() {
 				<Toolbar disableGutters>
 					<Link to="/">
 						<Button className={styles.title}>
-							<Typography variant="h5" style={{ display: 'flex', alignItems: 'center' }}>
+							<Typography variant="h5" style={{ display: 'flex', alignItems: 'center', textDecoration: 'underline', textDecorationColor: '#ffffff' }}>
 								pro <Dot /> noun <Dot /> cit
 							</Typography>
 						</Button>
@@ -68,7 +68,7 @@ export default function Navbar() {
 					</div>
 				</Toolbar>
 			</Container>
-		</AppBar>
+		</AppBar >
 	)
 }
 

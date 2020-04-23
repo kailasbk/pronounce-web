@@ -77,7 +77,7 @@ export default function Login() {
 			<TextField className={styles.input} id="password" value={password} error={error === 'ePass' ? true : false} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { handleSubmit() } }} />
 			<Button style={{ width: '100%', marginTop: '10px' }} variant="contained" color="primary" onClick={handleSubmit}> Login </Button>
-			<Link to="/register">
+			<Link to="/register" style={{ textDecoration: 'none' }}>
 				<Button style={{ width: '100%', marginTop: '10px' }} variant="contained" color="secondary">
 					Don't have an account? Sign-up here.
 				</Button>

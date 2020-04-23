@@ -105,7 +105,7 @@ export default function Register() {
 			<TextField className={styles.input} value={password} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined" />
 			<TextField className={styles.input} value={confirm} onChange={(e) => setConfirm(e.target.value)} label="Confirm Password" type="password" variant="outlined" />
 			<Button style={{ width: '100%', marginTop: '5px' }} variant="contained" color="primary" onClick={handleSubmit}> Register </Button>
-			<Link to="/login">
+			<Link to="/login" style={{ textDecoration: 'none' }}>
 				<Button style={{ width: '100%', marginTop: '10px' }} variant="contained" color="secondary">
 					Already have an account? Login here.
 				</Button>
