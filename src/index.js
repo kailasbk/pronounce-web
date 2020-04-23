@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import './index.css';
-import * as serviceWorker from './serviceWorker';
+import * as serviceWorker from './js/serviceWorker';
 import token from './js/token.js'
 
 import Home from './pages/Home';
@@ -15,8 +14,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 
 import Navbar from './components/Navbar';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { Container } from '@material-ui/core';
+import { Container, CssBaseline } from '@material-ui/core';
 
 function App() {
 	function ProtectedRoutes(props) {
@@ -40,10 +38,10 @@ function App() {
 	}
 
 	return (
-		<div className="container">
+		<div className="container" style={{ minHeight: '100vh' }}>
 			<Router>
 				<Navbar />
-				<Container maxWidth="md" className="content">
+				<Container maxWidth="md" className="content" style={{ padding: '16px' }}>
 					<Switch>
 						<Route path="/register" component={Register} />
 						<Route path="/login" component={Login} />
