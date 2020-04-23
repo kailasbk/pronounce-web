@@ -41,32 +41,7 @@ const useStyles = makeStyles({
 
 export default function Group() {
 	const [groupName, setGroupName] = useState('');
-	const [members, setMembers] = useState([
-		{
-			username: '',
-			firstname: '',
-			lastname: '',
-			email: '',
-			picturesrc: '',
-			audiosrc: ''
-		},
-		{
-			username: '',
-			firstname: '',
-			lastname: '',
-			email: '',
-			picturesrc: '',
-			audiosrc: ''
-		},
-		{
-			username: '',
-			firstname: '',
-			lastname: '',
-			email: '',
-			picturesrc: '',
-			audiosrc: ''
-		},
-	]);
+	const [members, setMembers] = useState(['', '', '']);
 	const styles = useStyles();
 
 	useEffect(() => {
@@ -79,29 +54,7 @@ export default function Group() {
 			})
 			.then(res => res.json())
 			.then((json) => {
-				const newMembers = json.members.map((member) => {
-					const newMember = {
-						username: member.username,
-						firstname: member.firstname,
-						lastname: member.lastname,
-						email: member.email,
-						picturesrc: '',
-						audiosrc: ''
-					};
-
-					if (member.picture !== null) {
-						const picture = new Blob([new Uint8Array(member.picture.data)], { type: 'image/jpeg' });
-						newMember.picturesrc = URL.createObjectURL(picture);
-					}
-
-					if (member.audio !== null) {
-						const audio = new Blob([new Uint8Array(member.audio.data)], { type: 'audio/m4a' });
-						newMember.audiosrc = URL.createObjectURL(audio);
-					}
-
-					return newMember;
-				});
-				setMembers(newMembers);
+				setMembers(json.members);
 				setGroupName(json.name);
 			});
 
@@ -109,10 +62,62 @@ export default function Group() {
 	}, []);
 
 	function Member(props) {
+		const [info, setInfo] = useState({
+			username: '',
+			firstname: '',
+			lastname: '',
+			email: '',
+			picturesrc: '',
+			audiosrc: ''
+		});
 		const [isPlaying, setPlaying] = useState(false);
 
+		useEffect(() => {
+			const controller = new AbortController();
+			if (props.member !== '') {
+				fetch(`http://localhost:3001/user/${props.member}`,
+					{
+						method: 'GET',
+						headers: {
+							'Authorization': `Bearer ${token.get()}`
+						},
+						signal: controller.signal
+					})
+					.then(res => res.json())
+					.then(json => {
+						const newInfo = {
+							username: json.username,
+							firstname: json.firstname,
+							lastname: json.lastname,
+							email: json.email,
+							picturesrc: '',
+							audiosrc: ''
+						};
+
+						if (json.picture !== null) {
+							const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
+							newInfo.picturesrc = URL.createObjectURL(picture);
+						}
+
+						if (json.audio !== null) {
+							const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
+							newInfo.audiosrc = URL.createObjectURL(audio);
+						}
+
+						setInfo(newInfo);
+					})
+					.catch(err => {
+						if (err.name === 'AbortError') {
+							console.log('Aborted fetch request.');
+						}
+					});
+			}
+
+			return function cleanup() { controller.abort() };
+		}, [props.member]);
+
 		function handlePlaying(e) {
-			if (props.member.audiosrc !== '') {
+			if (info.audiosrc !== '') {
 				const audio = document.getElementById(`audio-${props.index}`);
 				if (isPlaying) {
 					audio.pause();
@@ -138,8 +143,8 @@ export default function Group() {
 							}}
 							badgeContent={
 								<div>
-									{props.member.audiosrc !== '' ?
-										<audio src={props.member.audiosrc} id={'audio-' + props.index} onEnded={() => setPlaying(false)}></audio>
+									{info.audiosrc !== '' ?
+										<audio src={info.audiosrc} id={'audio-' + props.index} onEnded={() => setPlaying(false)}></audio>
 										:
 										<> </>
 									}
@@ -149,22 +154,27 @@ export default function Group() {
 								</div>
 							}
 						>
-							<Avatar src={props.member.picturesrc} style={{ width: '60px', height: '60px' }} />
+							<Avatar src={info.picturesrc} style={{ width: '60px', height: '60px' }} />
 						</Badge>
-						<Typography variant="h6"> {props.member.firstname} {props.member.lastname} </Typography>
+						<Typography variant="h6"> {info.firstname} {info.lastname} </Typography>
 					</div >
 					<Divider />
-					<Typography style={{ marginTop: '10px' }}> {props.member.username} </Typography>
-					<Typography> <a href={'mailto:' + props.member.email}>{props.member.email}</a> </Typography>
+					<Typography style={{ marginTop: '10px' }}> {info.username} </Typography>
+					<Typography> <a href={'mailto:' + info.email}>{info.email}</a> </Typography>
 				</Card >
 			</Grid >
 		)
 	}
 
 	function Members(props) {
-		var content = props.members.map((member, index) => {
-			return <Member member={member} key={index} index={index} />
-		});
+		const [content, setContent] = useState(<div />);
+
+		useEffect(() => {
+			const newContent = props.members.map((member, index) => {
+				return <Member member={member} key={index} index={index} />
+			});
+			setContent(newContent);
+		}, [props.members]);
 
 		if (content.length === 0) {
 			return <Typography> No members! </Typography>
