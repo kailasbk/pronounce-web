@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles, Paper, Card, Divider, Typography, Grid, Avatar, Button, Badge, IconButton } from '@material-ui/core';
 import { PlayArrow, Stop } from '@material-ui/icons';
-import token from '../token.js';
+import token from '../js/token.js';
 
 const useStyles = makeStyles({
 	pane: {

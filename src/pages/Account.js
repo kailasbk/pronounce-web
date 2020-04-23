@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { makeStyles, useTheme, Paper, Divider, Typography, Avatar, Button, ButtonGroup, Badge, IconButton } from '@material-ui/core';
 import { AddCircleTwoTone, PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever } from '@material-ui/icons'
-import token from '../token.js';
+import token from '../js/token.js';
 
 const useStyles = makeStyles(theme => ({
 	pane: {

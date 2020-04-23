@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
-import token from './token.js'
+import token from './js/token.js'
 
 import Home from './pages/Home';
 import About from './pages/About';

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Redirect, Link, useLocation } from 'react-router-dom';
 import { makeStyles, Typography, Paper, Button, TextField, Divider } from '@material-ui/core';
 import { Alert } from '@material-ui/lab'
-import token from '../token.js'
+import token from '../js/token.js'
 
 const useStyles = makeStyles({
 	pane: {
