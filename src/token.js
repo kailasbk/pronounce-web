@@ -7,6 +7,16 @@ const token = (function () {
 		},
 		set: function (value) {
 			innerToken = value;
+		},
+		getRefresh: function () {
+			return sessionStorage.getItem('token');
+		},
+		setRefresh: function (value) {
+			sessionStorage.setItem('token', value);
+		},
+		clear: function () {
+			innerToken = '';
+			sessionStorage.setItem('token', '');
 		}
 	}
 })();

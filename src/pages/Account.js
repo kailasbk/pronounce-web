@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { makeStyles, useTheme, Paper, Divider, Typography, Avatar, Button, ButtonGroup, Badge, IconButton } from '@material-ui/core';
 import { AddCircleTwoTone, PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever } from '@material-ui/icons'
 import token from '../token.js';
@@ -51,6 +52,7 @@ const useStyles = makeStyles(theme => ({
 export default function Account() {
 	const styles = useStyles();
 	const theme = useTheme();
+	const history = useHistory();
 	const [info, setInfo] = useState({
 		username: '',
 		firstname: '',
@@ -66,38 +68,46 @@ export default function Account() {
 
 	// get data from API with fetch
 	useEffect(() => {
+		const controller = new AbortController();
 		(async function () {
-			const json = await fetch('http://localhost:3001/user/me',
-				{
-					method: 'GET',
-					headers: {
-						'Authorization': `Bearer ${token.get()}`
-					}
-				})
-				.then(res => res.json());
+			try {
+				const json = await fetch('http://localhost:3001/user/me',
+					{
+						method: 'GET',
+						headers: {
+							'Authorization': `Bearer ${token.get()}`
+						},
+						signal: controller.signal
+					})
+					.then(res => res.json());
 
-			const newInfo = {
-				username: json.username,
-				firstname: json.firstname,
-				lastname: json.lastname,
-				email: json.email,
-				picturesrc: '',
-				audiosrc: ''
+				const newInfo = {
+					username: json.username,
+					firstname: json.firstname,
+					lastname: json.lastname,
+					email: json.email,
+					picturesrc: '',
+					audiosrc: ''
+				}
+
+				if (json.picture !== null) {
+					const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
+					newInfo.picturesrc = URL.createObjectURL(picture);
+				}
+
+				if (json.audio !== null) {
+					const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
+					newInfo.audiosrc = URL.createObjectURL(audio);
+				}
+
+				setInfo(newInfo);
+			} catch (err) {
+				if (err.name === "AbortError") {
+					console.log('Aborted fetch request.');
+				}
 			}
-
-			if (json.picture !== null) {
-				const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
-				newInfo.picturesrc = URL.createObjectURL(picture);
-			}
-
-			if (json.audio !== null) {
-				const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
-				newInfo.audiosrc = URL.createObjectURL(audio);
-			}
-
-			setInfo(newInfo);
 		})();
-		return function cleanup() { }
+		return function cleanup() { controller.abort() }
 	}, []);
 
 	async function handleUploadProfile(e) {
@@ -167,6 +177,11 @@ export default function Account() {
 			URL.revokeObjectURL(old.audiosrc);
 			return { ...old, audiosrc: URL.createObjectURL(audio) };
 		});
+	}
+
+	function handleLogout(e) {
+		token.clear();
+		history.push('/login', { from: '/' });
 	}
 
 	function handleDeleteAudio(e) {
@@ -259,13 +274,13 @@ export default function Account() {
 			</Typography>
 			<Divider />
 			<div style={{ display: 'flex', alignItems: 'center' }}>
-				<Typography style={{ flexGrow: 3, flexBasis: '60%' }}> Pronouncation: </Typography>
+				<Typography style={{ flexGrow: 3, flexBasis: '50%' }}> Pronouncation: </Typography>
 				{info.audiosrc !== '' ?
 					<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={(preview === '') ? info.audiosrc : preview} />
 					:
 					<> </>
 				}
-				<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '40%', flexGrow: 2 }}>
+				<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
 					<Button style={{ width: '50%' }} color={info.audiosrc !== '' || preview !== '' ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>
 						{isPlaying ? <Stop /> : <PlayArrow />}
 					</Button>
@@ -295,6 +310,7 @@ export default function Account() {
 			<Divider />
 			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained'> Change Email </Button>
 			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained'> Reset Password </Button>
+			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handleLogout}> Logout </Button>
 		</Paper >
 	);
 }

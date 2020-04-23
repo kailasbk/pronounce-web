@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect, Link, useLocation } from 'react-router-dom';
 import { makeStyles, Typography, Paper, Button, TextField, Divider } from '@material-ui/core';
 import { Alert } from '@material-ui/lab'
@@ -22,7 +22,17 @@ export default function Login() {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const [submitted, setSubmitted] = useState(false);
+	const [submitted, setSubmitted] = useState();
+
+	useEffect(() => {
+		if (sessionStorage.getItem('token') !== '') {
+			// validate the refresh token
+			console.log('Has a refresh key. Logging in...');
+			token.set(sessionStorage.getItem('token'));
+			// if valid (given a JWT) set submitted to true
+			setSubmitted(true);
+		}
+	}, []);
 
 	function handleSubmit(e) {
 		if (username === "") {
@@ -57,6 +67,7 @@ export default function Login() {
 			})
 			.then(text => {
 				token.set(text);
+				token.setRefresh(text); // change with refresh key in future
 				if (token.get() !== '') {
 					console.log('Token set successfully');
 					setSubmitted(true);
@@ -65,7 +76,12 @@ export default function Login() {
 	}
 
 	if (submitted) {
-		return <Redirect to={location.state.from} />
+		if (location.state) {
+			return <Redirect to={location.state.from} />
+		}
+		else {
+			return <Redirect to="/" />
+		}
 	}
 
 	return (
