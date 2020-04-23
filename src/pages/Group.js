@@ -66,6 +66,7 @@ export default function Group() {
 			username: '',
 			firstname: '',
 			lastname: '',
+			pronouns: '',
 			email: '',
 			picturesrc: '',
 			audiosrc: ''
@@ -89,6 +90,7 @@ export default function Group() {
 							username: json.username,
 							firstname: json.firstname,
 							lastname: json.lastname,
+							pronouns: json.pronouns,
 							email: json.email,
 							picturesrc: '',
 							audiosrc: ''
@@ -158,8 +160,13 @@ export default function Group() {
 						</Badge>
 						<Typography variant="h6"> {info.firstname} {info.lastname} </Typography>
 					</div >
-					<Divider />
-					<Typography style={{ marginTop: '10px' }}> {info.username} </Typography>
+					<Divider style={{ marginBottom: '10px' }} />
+					{info.pronouns !== '' ?
+						< Typography > {info.pronouns} </Typography>
+						:
+						<></>
+					}
+					<Typography> {info.username} </Typography>
 					<Typography> <a href={'mailto:' + info.email}>{info.email}</a> </Typography>
 				</Card >
 			</Grid >

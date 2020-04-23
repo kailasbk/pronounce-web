@@ -57,6 +57,7 @@ export default function Account() {
 		username: '',
 		firstname: '',
 		lastname: '',
+		pronouns: '',
 		email: '',
 		picturesrc: '',
 		audiosrc: ''
@@ -85,6 +86,7 @@ export default function Account() {
 					username: json.username,
 					firstname: json.firstname,
 					lastname: json.lastname,
+					pronouns: json.pronouns,
 					email: json.email,
 					picturesrc: '',
 					audiosrc: ''
@@ -264,13 +266,19 @@ export default function Account() {
 			<Typography className={styles.bar}>
 				<span>Firstname: </span>
 				<span className={styles.spacer} />
-				<span className={(info.first === '') ? styles.emptyName : ''}>{info.firstname}</span>
+				<span className={(info.firstname === '') ? styles.emptyName : ''}>{info.firstname}</span>
 			</Typography>
 			<Divider />
 			<Typography className={styles.bar}>
 				<span>Lastname: </span>
 				<span className={styles.spacer} />
-				<span className={(info.last === '') ? styles.emptyName : ''}>{info.lastname}</span>
+				<span className={(info.lastname === '') ? styles.emptyName : ''}>{info.lastname}</span>
+			</Typography>
+			<Divider />
+			<Typography className={styles.bar}>
+				<span>Pronouns: </span>
+				<span className={styles.spacer} />
+				<span className={(info.lastname === '') ? styles.emptyName : ''}>{info.pronouns}</span>
 			</Typography>
 			<Divider />
 			<div style={{ display: 'flex', alignItems: 'center' }}>
