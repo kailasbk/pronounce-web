@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Redirect, Link } from 'react-router-dom';
+import { Redirect, Link, useLocation } from 'react-router-dom';
 import { makeStyles, Typography, Paper, Button, TextField, Divider } from '@material-ui/core';
 import { Alert } from '@material-ui/lab'
 import token from '../token.js'
@@ -18,6 +18,7 @@ const useStyles = makeStyles({
 
 export default function Login() {
 	const styles = useStyles();
+	const location = useLocation();
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
@@ -64,7 +65,7 @@ export default function Login() {
 	}
 
 	if (submitted) {
-		return <Redirect to='/' />
+		return <Redirect to={location.state.from} />
 	}
 
 	return (

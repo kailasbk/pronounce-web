@@ -19,10 +19,10 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { Container } from '@material-ui/core';
 
 function App() {
-	function ProtectedRoutes() {
+	function ProtectedRoutes(props) {
 		if (token.get() === '') {
 			console.log('Not logged in. Redirecting...');
-			return <Redirect to="/login" />
+			return <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
 		}
 		else {
 			return (
