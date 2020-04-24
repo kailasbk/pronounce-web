@@ -283,10 +283,8 @@ export default function Account() {
 			<Divider />
 			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<Typography style={{ flexGrow: 3, flexBasis: '50%' }}> Pronouncation: </Typography>
-				{info.audiosrc !== '' ?
+				{info.audiosrc !== '' &&
 					<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={(preview === '') ? info.audiosrc : preview} />
-					:
-					<> </>
 				}
 				<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
 					<Button style={{ width: '50%' }} color={info.audiosrc !== '' || preview !== '' ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>
