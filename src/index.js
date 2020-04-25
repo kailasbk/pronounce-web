@@ -15,6 +15,9 @@ import Login from './pages/Login';
 
 import Navbar from './components/Navbar';
 import { Container, CssBaseline } from '@material-ui/core';
+import { unstable_createMuiStrictModeTheme as createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+
+const theme = createMuiTheme({});
 
 function App() {
 	function ProtectedRoutes(props) {
@@ -29,7 +32,7 @@ function App() {
 						<Route path="/" component={Home} exact />
 						<Route path="/account" component={Account} />
 						<Route path="/invite" component={Invite} />
-						<Route path="/group" component={Group} />
+						<Route path="/group/:id?" component={Group} />
 						<Route component={Error} />
 					</Switch>
 				</Route>
@@ -56,8 +59,10 @@ function App() {
 
 ReactDOM.render(
 	<React.StrictMode>
-		<CssBaseline />
-		<App />
+		<ThemeProvider theme={theme}>
+			<CssBaseline />
+			<App />
+		</ThemeProvider>
 	</React.StrictMode >,
 	document.getElementById('root')
 );
