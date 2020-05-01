@@ -87,7 +87,7 @@ export default function Account() {
 			<Typography className={styles.bar}>
 				<span>{props.field + ': '}</span>
 				<span className={styles.spacer} />
-				<span className={!props.value ? styles.skeletonField : ''}>{props.value}</span>
+				<span className={!info.username ? styles.skeletonField : ''}>{props.value}</span>
 			</Typography>
 		);
 	}
