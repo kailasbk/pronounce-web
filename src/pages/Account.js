@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { makeStyles, useTheme, Paper, Divider, Typography, Avatar, Button, ButtonGroup, Badge, IconButton } from '@material-ui/core';
 import { AddCircleTwoTone, PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever } from '@material-ui/icons'
+import Recorder from '../components/Recorder'
 import token from '../js/token.js';
+import fetchUser from '../js/fetchUser.js';
 
 const useStyles = makeStyles(theme => ({
 	pane: {
@@ -23,26 +25,17 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		flexFlow: 'wrap'
 	},
-	username: {
-		display: 'inline-block',
-	},
 	spacer: {
 		flexGrow: 1
 	},
-	emptyUsername: {
+	skeletonUsername: {
 		flexGrow: 1,
 		height: '45px',
 		borderRadius: '5px',
 		backgroundColor: '#bdbdbd'
 	},
-	emptyName: {
-		width: '100px',
-		height: '24px',
-		borderRadius: '2px',
-		backgroundColor: '#bdbdbd'
-	},
-	emptyEmail: {
-		width: '160px',
+	skeletonField: {
+		width: '120px',
 		height: '24px',
 		borderRadius: '2px',
 		backgroundColor: '#bdbdbd'
@@ -72,36 +65,7 @@ export default function Account() {
 		const controller = new AbortController();
 		(async function () {
 			try {
-				const json = await fetch('http://localhost:3001/user/me',
-					{
-						method: 'GET',
-						headers: {
-							'Authorization': `Bearer ${token.get()}`
-						},
-						signal: controller.signal
-					})
-					.then(res => res.json());
-
-				const newInfo = {
-					username: json.username,
-					firstname: json.firstname,
-					lastname: json.lastname,
-					pronouns: json.pronouns,
-					email: json.email,
-					picturesrc: '',
-					audiosrc: ''
-				}
-
-				if (json.picture !== null) {
-					const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
-					newInfo.picturesrc = URL.createObjectURL(picture);
-				}
-
-				if (json.audio !== null) {
-					const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
-					newInfo.audiosrc = URL.createObjectURL(audio);
-				}
-
+				const newInfo = await fetchUser(0, controller);
 				setInfo(newInfo);
 			} catch (err) {
 				if (err.name === "AbortError") {
@@ -109,14 +73,15 @@ export default function Account() {
 				}
 			}
 		})();
+
 		return function cleanup() { controller.abort() }
 	}, []);
 
 	async function handleUploadProfile(e) {
 		const data = new FormData();
-		data.append('image', e.target.files[0]);
+		data.append('file', e.target.files[0]);
 
-		const picture = await fetch(`http://localhost:3001/picture`,
+		const picture = await fetch(`http://localhost:3001/user/0/picture`,
 			{
 				method: 'PUT',
 				headers: {
@@ -124,15 +89,13 @@ export default function Account() {
 				},
 				body: data
 			})
-			.then(() => {
-				return fetch(`http://localhost:3001/picture/me`,
-					{
-						method: 'GET',
-						headers: {
-							'Authorization': `Bearer ${token.get()}`
-						}
-					});
-			})
+			.then(() => fetch(`http://localhost:3001/user/0/picture`,
+				{
+					method: 'GET',
+					headers: {
+						'Authorization': `Bearer ${token.get()}`
+					}
+				}))
 			.then(res => res.blob());
 
 		setInfo(old => {
@@ -147,7 +110,7 @@ export default function Account() {
 			.then(res => res.blob())
 			.then(blob => data.append('file', blob));
 
-		const audio = await fetch(`http://localhost:3001/audio`,
+		const audio = await fetch(`http://localhost:3001/user/0/audio`,
 			{
 				method: 'PUT',
 				headers: {
@@ -155,10 +118,10 @@ export default function Account() {
 				},
 				body: data
 			})
-			.then((res) => {
+			.then(res => {
 				if (res.ok) {
 					handleDeleteAudio();
-					return fetch(`http://localhost:3001/audio/me`,
+					return fetch(`http://localhost:3001/user/0/audio`,
 						{
 							method: 'GET',
 							headers: {
@@ -192,7 +155,7 @@ export default function Account() {
 	}
 
 	function handleAudio(e) {
-		if (info.audiosrc !== '' || preview !== '') {
+		if (info.audiosrc || preview) {
 			const audio = document.getElementById('pronounciation');
 			if (isPlaying) {
 				audio.pause();
@@ -235,6 +198,16 @@ export default function Account() {
 		}
 	}, [recorder, isRecording, preview]);
 
+	function Bar(props) {
+		return (
+			<Typography className={styles.bar}>
+				<span>{props.field + ': '}</span>
+				<span className={styles.spacer} />
+				<span className={!props.value ? styles.skeletonField : ''}>{props.value}</span>
+			</Typography>
+		);
+	}
+
 	return (
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Account </Typography>
@@ -259,60 +232,46 @@ export default function Account() {
 					<Avatar className={styles.profilePic} src={info.picturesrc} />
 				</Badge>
 				<span className={styles.spacer} />
-				<Typography className={(info.username === '') ? styles.emptyUsername : styles.username} variant="h4">{info.username}</Typography>
+				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant="h4">{info.username}</Typography>
 				<span className={styles.spacer} />
 			</div>
 			<Divider />
-			<Typography className={styles.bar}>
-				<span>Firstname: </span>
-				<span className={styles.spacer} />
-				<span className={(info.firstname === '') ? styles.emptyName : ''}>{info.firstname}</span>
-			</Typography>
+			<Bar field="Firstname" value={info.firstname} />
 			<Divider />
-			<Typography className={styles.bar}>
-				<span>Lastname: </span>
-				<span className={styles.spacer} />
-				<span className={(info.lastname === '') ? styles.emptyName : ''}>{info.lastname}</span>
-			</Typography>
+			<Bar field="Lastname" value={info.lastname} />
 			<Divider />
-			<Typography className={styles.bar}>
-				<span>Pronouns: </span>
-				<span className={styles.spacer} />
-				<span className={(info.lastname === '') ? styles.emptyName : ''}>{info.pronouns}</span>
-			</Typography>
+			<Bar field="Pronouns" value={info.pronouns} />
 			<Divider />
 			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<Typography style={{ flexGrow: 3, flexBasis: '50%' }}> Pronouncation: </Typography>
-				{info.audiosrc !== '' &&
-					<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={(preview === '') ? info.audiosrc : preview} />
-				}
-				<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
-					<Button style={{ width: '50%' }} color={info.audiosrc !== '' || preview !== '' ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>
-						{isPlaying ? <Stop /> : <PlayArrow />}
-					</Button>
-					{(preview === '') ?
-						<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord}>
-							<RecordVoiceOver />
-						</Button>
-						:
-						[
-							<Button key={0} style={{ width: '25%', color: '#ffffff', backgroundColor: theme.palette.success.main }} variant='contained' onClick={handleUploadAudio}>
-								<Publish />
-							</Button>
-							,
-							<Button key={1} style={{ width: '25%', color: '#ffffff', backgroundColor: theme.palette.error.main }} variant='contained' onClick={handleDeleteAudio}>
-								<DeleteForever />
-							</Button>
-						]
+				<>
+					{(info.audiosrc || preview) &&
+						<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={!preview ? info.audiosrc : preview} />
 					}
-				</ButtonGroup>
+					<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
+						<Button style={{ width: '50%' }} color={info.audiosrc || preview ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>
+							{isPlaying ? <Stop /> : <PlayArrow />}
+						</Button>
+						{!preview ?
+							<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord}>
+								<RecordVoiceOver />
+							</Button>
+							:
+							[
+								<Button key={0} style={{ width: '25%', color: '#ffffff', backgroundColor: theme.palette.success.main }} variant='contained' onClick={handleUploadAudio}>
+									<Publish />
+								</Button>
+								,
+								<Button key={1} style={{ width: '25%', color: '#ffffff', backgroundColor: theme.palette.error.main }} variant='contained' onClick={handleDeleteAudio}>
+									<DeleteForever />
+								</Button>
+							]
+						}
+					</ButtonGroup>
+				</>
 			</div>
 			<Divider />
-			<Typography className={styles.bar}>
-				<span>Email: </span>
-				<span className={styles.spacer} />
-				<span className={(info.email === '') ? styles.emptyEmail : ''}>{info.email}</span>
-			</Typography>
+			<Bar field="Email" value={info.email} />
 			<Divider />
 			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained'> Change Email </Button>
 			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained'> Reset Password </Button>

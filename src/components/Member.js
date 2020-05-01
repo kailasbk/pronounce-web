@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Divider, Typography, Grid, Avatar, Badge, IconButton } from '@material-ui/core';
 import { PlayArrow, Stop, Star } from '@material-ui/icons';
-import token from '../js/token.js';
+import fetchUser from '../js/fetchUser.js'
 
 function Member(props) {
 	const [info, setInfo] = useState({
@@ -17,51 +17,24 @@ function Member(props) {
 
 	useEffect(() => {
 		const controller = new AbortController();
-		if (props.username !== '') {
-			fetch(`http://localhost:3001/user/${props.username}`,
-				{
-					method: 'GET',
-					headers: {
-						'Authorization': `Bearer ${token.get()}`
-					},
-					signal: controller.signal
-				})
-				.then(res => res.json())
-				.then(json => {
-					const newInfo = {
-						username: json.username,
-						firstname: json.firstname,
-						lastname: json.lastname,
-						pronouns: json.pronouns,
-						email: json.email,
-						picturesrc: '',
-						audiosrc: ''
-					};
-
-					if (json.picture !== null) {
-						const picture = new Blob([new Uint8Array(json.picture.data)], { type: 'image/jpeg' });
-						newInfo.picturesrc = URL.createObjectURL(picture);
-					}
-
-					if (json.audio !== null) {
-						const audio = new Blob([new Uint8Array(json.audio.data)], { type: 'audio/m4a' });
-						newInfo.audiosrc = URL.createObjectURL(audio);
-					}
-
+		(async function () {
+			if (props.username) {
+				try {
+					const newInfo = await fetchUser(props.username, controller);
 					setInfo(newInfo);
-				})
-				.catch(err => {
-					if (err.name === 'AbortError') {
+				} catch (err) {
+					if (err.name === "AbortError") {
 						console.log('Aborted fetch request.');
 					}
-				});
-		}
+				}
+			}
+		})();
 
 		return function cleanup() { controller.abort() };
 	}, [props.username]);
 
 	function handlePlaying(e) {
-		if (info.audiosrc !== '') {
+		if (info.audiosrc) {
 			const audio = document.getElementById(`audio-${props.username}`);
 			if (isPlaying) {
 				audio.pause();
@@ -90,7 +63,7 @@ function Member(props) {
 						}}
 						badgeContent={
 							<div>
-								{info.audiosrc !== '' &&
+								{info.audiosrc &&
 									<audio src={info.audiosrc} id={'audio-' + props.username} onEnded={() => setPlaying(false)}></audio>
 								}
 								<IconButton onClick={handlePlaying} style={{ padding: '3px' }}>
@@ -104,7 +77,7 @@ function Member(props) {
 					<Typography variant="h6"> {info.firstname} {info.lastname} </Typography>
 				</div >
 				<Divider style={{ marginBottom: '10px' }} />
-				{info.pronouns !== '' &&
+				{info.pronouns &&
 					< Typography > {info.pronouns} </Typography>
 				}
 				<Typography> {info.username} </Typography>

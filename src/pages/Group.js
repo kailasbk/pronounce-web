@@ -58,43 +58,57 @@ export default function Group() {
 	const [isMenu, setMenu] = useState(false);
 
 	useEffect(() => {
-		if (id === undefined) {
-			fetch('http://localhost:3001/user/groups',
-				{
-					method: 'GET',
-					headers: {
-						'Authorization': `Bearer ${token.get()}`
-					}
-				})
-				.then(res => res.json())
-				.then(json => history.push(`/group/${json[0].id}`));
+		const controller = new AbortController();
+		fetch('http://localhost:3001/user/0/groups',
+			{
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`
+				},
+				signal: controller.signal
+			})
+			.then(res => res.json())
+			.then(json => {
+				setGroups(json);
+			})
+			.catch(err => {
+				if (err.name === "AbortError") {
+					console.log('Aborted fetch request.');
+				}
+			});
+
+		return function cleanup() { controller.abort() };
+	}, []);
+
+	useEffect(() => {
+		const controller = new AbortController();
+		if (!id) {
+			if (groups[0].id) {
+				history.push(`/group/${groups[0].id}`);
+			}
 		}
 		else {
-			fetch('http://localhost:3001/me/groups',
-				{
-					method: 'GET',
-					headers: {
-						'Authorization': `Bearer ${token.get()}`
-					}
-				})
-				.then(res => res.json())
-				.then(json => setGroups(json));
-
 			fetch(`http://localhost:3001/group/${id}`,
 				{
 					method: 'GET',
 					headers: {
 						'Authorization': `Bearer ${token.get()}`
-					}
+					},
+					signal: controller.signal
 				})
 				.then(res => res.json())
-				.then((json) => {
+				.then(json => {
 					setGroup(json);
+				})
+				.catch(err => {
+					if (err.name === "AbortError") {
+						console.log('Aborted fetch request.');
+					}
 				});
 		}
 
-		return function cleanup() { };
-	}, [history, id]);
+		return function cleanup() { controller.abort() };
+	}, [groups, history, id]);
 
 	return (
 		<Paper className={styles.pane}>
@@ -120,7 +134,7 @@ export default function Group() {
 			<Divider style={{ marginBottom: '10px' }} />
 			<div className={styles.actionBar}>
 				<Button color="primary" variant="contained" className={styles.study}>
-					<Link to="/study" style={{ all: 'inherit' }}> Study </Link>
+					<Link to={`/study/${id}`} style={{ all: 'inherit' }}> Study </Link>
 				</Button>
 				<Button color="secondary" variant="contained" className={styles.email} href=''> Email </Button>
 			</div >
