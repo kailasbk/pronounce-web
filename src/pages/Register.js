@@ -70,7 +70,7 @@ export default function Register() {
 				lastname: last,
 				email: email
 			}
-			fetch('http://localhost:3001/user/register',
+			fetch('http://localhost:3001/account/register',
 				{
 					method: 'POST',
 					headers: {

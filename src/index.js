@@ -12,6 +12,7 @@ import Error from './pages/Error';
 import Group from './pages/Group';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Start from './pages/Start';
 
 import Navbar from './components/Navbar';
 import { Container, CssBaseline } from '@material-ui/core';
@@ -21,7 +22,7 @@ const theme = createMuiTheme({});
 
 function App() {
 	function ProtectedRoutes(props) {
-		if (token.get() === '') {
+		if (!token.get()) {
 			console.log('Not logged in. Redirecting...');
 			return <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
 		}
@@ -33,6 +34,7 @@ function App() {
 						<Route path="/account" component={Account} />
 						<Route path="/invite" component={Invite} />
 						<Route path="/group/:id?" component={Group} />
+						<Route path="/start" component={Start} />
 						<Route component={Error} />
 					</Switch>
 				</Route>

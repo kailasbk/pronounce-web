@@ -6,11 +6,11 @@ import token from '../js/token.js';
 const useStyles = makeStyles(theme => ({
 	profilePic: {
 		display: 'inline-flex',
-		minWidth: '60px',
-		minHeight: '60px',
+		minWidth: '90px',
+		minHeight: '90px',
 		[theme.breakpoints.up('sm')]: {
-			width: '120px',
-			height: '120px'
+			width: '180px',
+			height: '180px'
 		}
 	}
 }));

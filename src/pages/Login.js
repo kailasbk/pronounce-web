@@ -3,6 +3,7 @@ import { Redirect, Link, useLocation } from 'react-router-dom';
 import { makeStyles, Typography, Paper, Button, TextField, Divider } from '@material-ui/core';
 import { Alert } from '@material-ui/lab'
 import token from '../js/token.js'
+import fetchUser from '../js/fetchUser.js'
 
 const useStyles = makeStyles({
 	pane: {
@@ -22,15 +23,15 @@ export default function Login() {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const [submitted, setSubmitted] = useState();
+	const [submitted, setSubmitted] = useState(0);
 
 	useEffect(() => {
-		if (sessionStorage.getItem('token') !== '') {
+		if (token.get() || token.getRefresh()) {
 			// validate the refresh token
 			console.log('Has a refresh key. Logging in...');
 			token.set(sessionStorage.getItem('token'));
 			// if valid (given a JWT) set submitted to true
-			setSubmitted(true);
+			setSubmitted(1);
 		}
 	}, []);
 
@@ -47,7 +48,7 @@ export default function Login() {
 			username: username,
 			password: password
 		}
-		fetch('http://localhost:3001/user/login', {
+		fetch('http://localhost:3001/account/login', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -68,19 +69,32 @@ export default function Login() {
 			.then(text => {
 				token.set(text);
 				token.setRefresh(text); // change with refresh key in future
-				if (token.get() !== '') {
+			})
+			.then(() => fetchUser(0, new AbortController()))
+			.then(user => {
+				if (token.get()) {
 					console.log('Token set successfully');
-					setSubmitted(true);
+					if (!user.audiosrc || !user.picturesrc) {
+						setSubmitted(2);
+					}
+					else {
+						setSubmitted(1);
+					}
 				}
 			});
 	}
 
 	if (submitted) {
-		if (location.state) {
-			return <Redirect to={location.state.from} />
+		if (submitted === 1) {
+			if (location.state) {
+				return <Redirect to={location.state.from} />
+			}
+			else {
+				return <Redirect to="/" />
+			}
 		}
-		else {
-			return <Redirect to="/" />
+		else if (submitted === 2) {
+			return <Redirect to='/start' />
 		}
 	}
 
