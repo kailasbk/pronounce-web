@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { makeStyles, useTheme, Paper, Divider, Typography, Button } from '@material-ui/core';
+import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField } from '@material-ui/core';
+import { Edit, Save } from '@material-ui/icons';
 import ProfileUpload from '../components/ProfileUpload'
 import Recorder from '../components/Recorder';
 import token from '../js/token.js';
@@ -46,6 +47,7 @@ export default function Account() {
 		picturesrc: '',
 		audiosrc: ''
 	});
+	const [edit, setEdit] = useState(false);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -62,6 +64,28 @@ export default function Account() {
 
 		return function cleanup() { controller.abort() }
 	}, []);
+
+	useEffect(() => {
+		const controller = new AbortController();
+		if (!edit) {
+			fetch('http://localhost:3001/user/0/update',
+				{
+					method: 'PUT',
+					headers: {
+						'Authorization': `Bearer ${token.get()}`,
+						'Content-Type': 'application/json'
+					},
+					signal: controller.signal,
+					body: JSON.stringify({
+						firstname: info.firstname,
+						lastname: info.lastname,
+						pronouns: info.pronouns,
+					})
+				})
+			// update the info later on for error catching
+		}
+		return function cleanup() { controller.abort() }
+	}, [edit]);
 
 	function handleLogout(e) {
 		token.clear();
@@ -100,15 +124,42 @@ export default function Account() {
 				<ProfileUpload picturesrc={info.picturesrc} update={updatePicture} />
 				<span className={styles.spacer} />
 				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant="h4">{info.username}</Typography>
+				<IconButton onClick={() => setEdit(!edit)}> {edit ? <Save /> : <Edit />} </IconButton>
 				<span className={styles.spacer} />
 			</div>
-			<Divider />
-			<Bar field="Firstname" value={info.firstname} />
-			<Divider />
-			<Bar field="Lastname" value={info.lastname} />
-			<Divider />
-			<Bar field="Pronouns" value={info.pronouns} />
-			<Divider />
+			{edit ?
+				<>
+					<Divider />
+					<Typography className={styles.bar}>
+						<span>Firstname</span>
+						<span className={styles.spacer} />
+						<TextField value={info.firstname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, firstname: value })) }} />
+					</Typography >
+					<Divider />
+					<Typography className={styles.bar}>
+						<span>Lastname</span>
+						<span className={styles.spacer} />
+						<TextField value={info.lastname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, lastname: value })) }} />
+					</Typography >
+					<Divider />
+					<Typography className={styles.bar}>
+						<span>Pronouns</span>
+						<span className={styles.spacer} />
+						<TextField value={info.pronouns} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, pronouns: value })) }} />
+					</Typography >
+					<Divider />
+				</>
+				:
+				<>
+					<Divider />
+					<Bar field="Firstname" value={info.firstname} />
+					<Divider />
+					<Bar field="Lastname" value={info.lastname} />
+					<Divider />
+					<Bar field="Pronouns" value={info.pronouns} />
+					<Divider />
+				</>
+			}
 			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<Typography style={{ flexGrow: 3, flexBasis: '50%' }}> Pronouncation: </Typography>
 				<Recorder audiosrc={info.audiosrc} update={updateAudio} />
