@@ -10,6 +10,7 @@ import Account from './pages/Account';
 import Invite from './pages/Invite';
 import Error from './pages/Error';
 import Group from './pages/Group';
+import Study from './pages/Study';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Start from './pages/Start';
@@ -34,6 +35,7 @@ function App() {
 						<Route path="/account" component={Account} />
 						<Route path="/invite" component={Invite} />
 						<Route path="/group/:id?" component={Group} />
+						<Route path="/study/:id" component={Study} />
 						<Route path="/start" component={Start} />
 						<Route component={Error} />
 					</Switch>
