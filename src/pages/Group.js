@@ -3,6 +3,7 @@ import { Link, useParams, useHistory } from 'react-router-dom';
 import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem } from '@material-ui/core';
 import Member from '../components/Member'
 import token from '../js/token.js';
+import fetchGroup from '../js/fetchGroup';
 
 const useStyles = makeStyles({
 	pane: {
@@ -83,32 +84,50 @@ export default function Group() {
 	useEffect(() => {
 		const controller = new AbortController();
 		if (!id) {
-			if (groups[0].id) {
+			if (groups.length > 0 && groups[0].id) {
 				history.push(`/group/${groups[0].id}`);
 			}
 		}
 		else {
-			fetch(`http://localhost:3001/group/${id}`,
-				{
-					method: 'GET',
-					headers: {
-						'Authorization': `Bearer ${token.get()}`
-					},
-					signal: controller.signal
-				})
-				.then(res => res.json())
-				.then(json => {
-					setGroup(json);
-				})
+			fetchGroup(id, controller)
+				.then(group => setGroup(group))
 				.catch(err => {
 					if (err.name === "AbortError") {
 						console.log('Aborted fetch request.');
 					}
 				});
 		}
-
 		return function cleanup() { controller.abort() };
 	}, [groups, history, id]);
+
+	if (groups.length === 0) {
+		return (
+			<Paper className={styles.pane}>
+				<div style={{ display: 'flex' }}>
+					<Typography variant="h5"> No groups! </Typography>
+					<span style={{ flexGrow: 1 }} />
+					<Button id='menu-button' onClick={() => setMenu(true)}> Select Group </Button>
+					<Menu
+						anchorEl={document.getElementById('menu-button')}
+						keepMounted
+						open={isMenu}
+						onClose={() => setMenu(false)}
+					>
+						{groups.map((group, index) => {
+							return (
+								<MenuItem key={index} onClick={() => { history.push(`/group/${group.id}`); setMenu(false) }}>
+									<Typography style={{ width: '300px' }}>{group.name}</Typography>
+								</MenuItem>
+							);
+						})}
+						<MenuItem key='create' onClick={console.log('created group')}>
+							<Typography style={{ width: '300px' }}> Create Group </Typography>
+						</MenuItem>
+					</Menu>
+				</div>
+			</Paper>
+		);
+	}
 
 	return (
 		<Paper className={styles.pane}>
@@ -145,7 +164,7 @@ export default function Group() {
 			</div>
 			<Divider />
 			<Grid container spacing={2} className={styles.members}>
-				<Member owner username={group.owner} />
+				<Member owner username={group.owner} key={group.owner} />
 				{group.members.map(member => <Member username={member} index={member} key={member} />)}
 			</Grid>
 		</Paper >
