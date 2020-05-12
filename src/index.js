@@ -7,7 +7,7 @@ import token from './js/token.js'
 import Home from './pages/Home';
 import About from './pages/About';
 import Account from './pages/Account';
-import Invite from './pages/Invite';
+import Invites from './pages/Invites';
 import Error from './pages/Error';
 import Group from './pages/Group';
 import Study from './pages/Study';
@@ -33,7 +33,7 @@ function App() {
 					<Switch>
 						<Route path="/" component={Home} exact />
 						<Route path="/account" component={Account} />
-						<Route path="/invite" component={Invite} />
+						<Route path="/invites" component={Invites} />
 						<Route path="/group/:id?" component={Group} />
 						<Route path="/study/:id" component={Study} />
 						<Route path="/start" component={Start} />

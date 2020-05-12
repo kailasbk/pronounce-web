@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem } from '@material-ui/core';
-import Member from '../components/Member'
+import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop } from '@material-ui/core';
+import Member from '../components/Member';
+import Invite from '../pages/Invite';
 import token from '../js/token.js';
 import fetchGroup from '../js/fetchGroup';
 
@@ -54,9 +55,13 @@ export default function Group() {
 	const [group, setGroup] = useState({
 		name: '',
 		owner: '',
-		members: ['']
+		members: [''],
+		me: ''
 	});
 	const [isMenu, setMenu] = useState(false);
+	const menuRef = useRef(null);
+	const [newName, setName] = useState('');
+	const [backdrop, setBackdrop] = useState(false);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -100,54 +105,60 @@ export default function Group() {
 		return function cleanup() { controller.abort() };
 	}, [groups, history, id]);
 
-	if (groups.length === 0) {
-		return (
-			<Paper className={styles.pane}>
-				<div style={{ display: 'flex' }}>
-					<Typography variant="h5"> No groups! </Typography>
-					<span style={{ flexGrow: 1 }} />
-					<Button id='menu-button' onClick={() => setMenu(true)}> Select Group </Button>
-					<Menu
-						anchorEl={document.getElementById('menu-button')}
-						keepMounted
-						open={isMenu}
-						onClose={() => setMenu(false)}
-					>
-						{groups.map((group, index) => {
-							return (
-								<MenuItem key={index} onClick={() => { history.push(`/group/${group.id}`); setMenu(false) }}>
-									<Typography style={{ width: '300px' }}>{group.name}</Typography>
-								</MenuItem>
-							);
-						})}
-						<MenuItem key='create' onClick={console.log('created group')}>
-							<Typography style={{ width: '300px' }}> Create Group </Typography>
-						</MenuItem>
-					</Menu>
-				</div>
-			</Paper>
-		);
+	function handleCreate(e) {
+		fetch('http://localhost:3001/group/new',
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: newName
+				})
+			})
+			.then(res => {
+				fetch('http://localhost:3001/user/0/groups',
+					{
+						method: 'GET',
+						headers: {
+							'Authorization': `Bearer ${token.get()}`
+						},
+					})
+					.then(res => res.json())
+					.then(json => {
+						setGroups(json);
+						setName('');
+					});
+			});
 	}
 
 	return (
 		<Paper className={styles.pane}>
 			<div style={{ display: 'flex' }}>
-				<Typography variant="h5"> {group.name} </Typography>
+				<Typography variant="h5"> {groups.length === 0 ? 'No Groups!' : group.name} </Typography>
 				<span style={{ flexGrow: 1 }} />
-				<Button id='menu-button' onClick={() => setMenu(true)}> Select Group </Button>
+				<Button ref={menuRef} onClick={() => setMenu(true)}> Select Group </Button>
 				<Menu
-					anchorEl={document.getElementById('menu-button')}
+					anchorEl={menuRef.current}
 					keepMounted
 					open={isMenu}
 					onClose={() => setMenu(false)}
 				>
-					{groups.map((group, index) => {
+					<MenuItem key='all' onClick={() => { history.push('/group/all'); setMenu(false); }}>
+						<Typography style={{ width: '300px' }}> All Groups </Typography>
+					</MenuItem>
+					{groups.map(group => {
 						return (
-							<MenuItem key={index} onClick={() => { history.push(`/group/${group.id}`); setMenu(false) }}>
+							<MenuItem key={group.id} onClick={() => { history.push(`/group/${group.id}`); setMenu(false); }}>
 								<Typography style={{ width: '300px' }}>{group.name}</Typography>
 							</MenuItem>
 						);
 					})}
+					<MenuItem key='create'>
+						<TextField key='field' value={newName} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.stopPropagation()} style={{ width: '200px' }}></TextField>
+						<Button variant="outlined" onClick={handleCreate} style={{ width: '80px', marginLeft: '20px' }}> Create </Button>
+					</MenuItem>
 				</Menu>
 			</div>
 			<Divider style={{ marginBottom: '10px' }} />
@@ -160,13 +171,16 @@ export default function Group() {
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>
 				<Typography variant="h5" style={{ flexGrow: 1 }}> Members </Typography>
-				<Button color="primary" variant="outlined" className={styles.add}> Invite Members </Button>
+				{(id !== 'all' && group.me === group.owner) &&
+					<Button color="primary" variant="outlined" className={styles.add} onClick={(e) => setBackdrop(true)}> Invite Members </Button>
+				}
 			</div>
 			<Divider />
 			<Grid container spacing={2} className={styles.members}>
 				<Member owner username={group.owner} key={group.owner} />
 				{group.members.map(member => <Member username={member} index={member} key={member} />)}
 			</Grid>
+			<Backdrop open={backdrop} style={{ zIndex: 1000 }}> <Invite handleClose={(e) => setBackdrop(false)} id={id} /> </Backdrop>
 		</Paper >
 	)
 }
