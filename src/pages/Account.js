@@ -41,13 +41,14 @@ export default function Account() {
 	const [info, setInfo] = useState({
 		username: '',
 		firstname: '',
+		nickname: '',
 		lastname: '',
 		pronouns: '',
 		email: '',
 		picturesrc: '',
 		audiosrc: ''
 	});
-	const [edit, setEdit] = useState(false);
+	const [edit, setEdit] = useState(0); // 0 is not editing
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -67,7 +68,7 @@ export default function Account() {
 
 	useEffect(() => {
 		const controller = new AbortController();
-		if (!edit) {
+		if (edit === 2) {
 			fetch('http://localhost:3001/user/0/update',
 				{
 					method: 'PUT',
@@ -78,14 +79,21 @@ export default function Account() {
 					signal: controller.signal,
 					body: JSON.stringify({
 						firstname: info.firstname,
+						nickname: info.nickname,
 						lastname: info.lastname,
 						pronouns: info.pronouns,
 					})
 				})
+				.then(res => setEdit(0))
+				.catch(err => {
+					if (err.name === "AbortError") {
+						console.log('Aborted fetch request.');
+					}
+				});
 			// update the info later on for error catching
 		}
 		return function cleanup() { controller.abort() }
-	}, [edit]);
+	}, [edit, info]);
 
 	function handleLogout(e) {
 		token.clear();
@@ -106,6 +114,18 @@ export default function Account() {
 		});
 	}
 
+	function handleEdit(e) {
+		if (edit === 0) {
+			setEdit(1);
+		}
+		else if (edit === 1) {
+			setEdit(2);
+		}
+		else {
+			setEdit(0);
+		}
+	}
+
 	function Bar(props) {
 		return (
 			<Typography className={styles.bar}>
@@ -124,26 +144,32 @@ export default function Account() {
 				<ProfileUpload picturesrc={info.picturesrc} update={updatePicture} />
 				<span className={styles.spacer} />
 				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant="h4">{info.username}</Typography>
-				<IconButton onClick={() => setEdit(!edit)}> {edit ? <Save /> : <Edit />} </IconButton>
+				<IconButton onClick={handleEdit}> {edit ? <Save /> : <Edit />} </IconButton>
 				<span className={styles.spacer} />
 			</div>
 			{edit ?
 				<>
 					<Divider />
 					<Typography className={styles.bar}>
-						<span>Firstname</span>
+						<span>Firstname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.firstname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, firstname: value })) }} />
 					</Typography >
 					<Divider />
 					<Typography className={styles.bar}>
-						<span>Lastname</span>
+						<span>Nickname: </span>
+						<span className={styles.spacer} />
+						<TextField value={info.nickname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, nickname: value })) }} />
+					</Typography >
+					<Divider />
+					<Typography className={styles.bar}>
+						<span>Lastname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.lastname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, lastname: value })) }} />
 					</Typography >
 					<Divider />
 					<Typography className={styles.bar}>
-						<span>Pronouns</span>
+						<span>Pronouns: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.pronouns} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, pronouns: value })) }} />
 					</Typography >
@@ -153,6 +179,8 @@ export default function Account() {
 				<>
 					<Divider />
 					<Bar field="Firstname" value={info.firstname} />
+					<Divider />
+					<Bar field="Nickname" value={info.nickname} />
 					<Divider />
 					<Bar field="Lastname" value={info.lastname} />
 					<Divider />

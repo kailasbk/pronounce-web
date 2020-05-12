@@ -44,6 +44,7 @@ async function fetchUser(id, controller) {
 	return {
 		username: json.username,
 		firstname: json.firstname,
+		nickname: json.nickname,
 		lastname: json.lastname,
 		pronouns: json.pronouns,
 		email: json.email,

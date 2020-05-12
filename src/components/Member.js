@@ -7,6 +7,7 @@ function Member(props) {
 	const [info, setInfo] = useState({
 		username: '',
 		firstname: '',
+		nickname: '',
 		lastname: '',
 		pronouns: '',
 		email: '',
@@ -74,11 +75,11 @@ function Member(props) {
 					>
 						<Avatar src={info.picturesrc} style={{ width: '60px', height: '60px' }} />
 					</Badge>
-					<Typography variant="h6"> {info.firstname} {info.lastname} </Typography>
+					<Typography variant="h6"> {info.firstname} {info.nickname ? `"${info.nickname}"` : ''} {info.lastname} </Typography>
 				</div >
 				<Divider style={{ marginBottom: '10px' }} />
 				{info.pronouns &&
-					< Typography > {info.pronouns} </Typography>
+					<Typography> {info.pronouns} </Typography>
 				}
 				<Typography> {info.username} </Typography>
 				<Typography> <a href={'mailto:' + info.email}>{info.email}</a> </Typography>
