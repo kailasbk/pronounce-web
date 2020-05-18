@@ -22,7 +22,7 @@ function ProfileUpload(props) {
 		const data = new FormData();
 		data.append('file', e.target.files[0]);
 
-		const picture = await fetch(`http://localhost:3001/user/0/picture`,
+		const picture = await fetch(`${process.env.REACT_APP_API_HOST}/user/0/picture`,
 			{
 				method: 'PUT',
 				headers: {
@@ -30,7 +30,7 @@ function ProfileUpload(props) {
 				},
 				body: data
 			})
-			.then(() => fetch(`http://localhost:3001/user/0/picture`,
+			.then(() => fetch(`${process.env.REACT_APP_API_HOST}/user/0/picture`,
 				{
 					method: 'GET',
 					headers: {

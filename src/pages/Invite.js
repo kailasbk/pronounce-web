@@ -40,7 +40,7 @@ export default function Invite(props) {
 
 	function handleSubmit(e) {
 		var emails = text.split(';');
-		fetch(`http://localhost:3001/group/${props.id}/invite`, {
+		fetch(`${process.env.REACT_APP_API_HOST}/group/${props.id}/invite`, {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token.get()}`,

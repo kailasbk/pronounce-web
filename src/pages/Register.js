@@ -70,7 +70,7 @@ export default function Register() {
 				lastname: last,
 				email: email
 			}
-			fetch('http://localhost:3001/account/register',
+			fetch(`${process.env.REACT_APP_API_HOST}/account/register`,
 				{
 					method: 'POST',
 					headers: {

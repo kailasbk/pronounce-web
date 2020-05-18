@@ -48,7 +48,7 @@ export default function Login() {
 			username: username,
 			password: password
 		}
-		fetch('http://localhost:3001/account/login', {
+		fetch(`${process.env.REACT_APP_API_HOST}/account/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -60,11 +60,13 @@ export default function Login() {
 					setError('');
 					return res.text();
 				}
-				else if (res.status !== 500) {
+				else if (res.status === 404) {
 					setError('wrong');
-					return '';
 				}
-				return '';
+				else if (res.status === 401) {
+					setError('unverified');
+				}
+				throw 'failed login';
 			})
 			.then(text => {
 				token.set(text);
@@ -81,7 +83,8 @@ export default function Login() {
 						setSubmitted(1);
 					}
 				}
-			});
+			})
+			.catch(err => console.log(err));
 	}
 
 	if (submitted) {
@@ -102,7 +105,8 @@ export default function Login() {
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Login </Typography>
 			<Divider />
-			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} >The username / password combination was invalid</Alert>
+			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} > The username / password combination was invalid </Alert>
+			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified </Alert>
 			<TextField className={styles.input} value={username} error={error === 'eUser' ? true : false} onChange={(e) => setUsername(e.target.value)} label="Username" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { document.getElementById('password').focus() } }} />
 			<TextField className={styles.input} id="password" value={password} error={error === 'ePass' ? true : false} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined"

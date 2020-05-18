@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme, Button, ButtonGroup } from '@material-ui/core';
 import { PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever } from '@material-ui/icons';
 import token from '../js/token.js';
@@ -9,6 +9,7 @@ function Recorder(props) {
 	const [isPlaying, setPlaying] = useState(false);
 	const [isRecording, setRecording] = useState(false);
 	const [recorder, setRecorder] = useState(null);
+	const audioRef = useRef(null);
 
 	async function handleUploadAudio(e) {
 		const data = new FormData();
@@ -16,7 +17,7 @@ function Recorder(props) {
 			.then(res => res.blob())
 			.then(blob => data.append('file', blob));
 
-		const audio = await fetch(`http://localhost:3001/user/0/audio`,
+		const audio = await fetch(`${process.env.REACT_APP_API_HOST}/user/0/audio`,
 			{
 				method: 'PUT',
 				headers: {
@@ -27,7 +28,7 @@ function Recorder(props) {
 			.then(res => {
 				if (res.ok) {
 					handleDeletePreview();
-					return fetch(`http://localhost:3001/user/0/audio`,
+					return fetch(`${process.env.REACT_APP_API_HOST}/user/0/audio`,
 						{
 							method: 'GET',
 							headers: {
@@ -54,7 +55,7 @@ function Recorder(props) {
 
 	function handleAudio(e) {
 		if (props.audiosrc || preview) {
-			const audio = document.getElementById('pronounciation');
+			const audio = audioRef.current;
 			if (isPlaying) {
 				audio.pause();
 				audio.currentTime = 0;
@@ -85,9 +86,8 @@ function Recorder(props) {
 		if (recorder !== null) {
 			recorder.ondataavailable = (e) => {
 				URL.revokeObjectURL(preview);
-				let url = URL.createObjectURL(e.data);
+				const url = URL.createObjectURL(e.data);
 				setPreview(url);
-				console.log('Recording Finished');
 			};
 
 			if (isRecording) {
@@ -99,7 +99,7 @@ function Recorder(props) {
 	return (
 		<>
 			{(props.audiosrc || preview) &&
-				<audio id="pronounciation" style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={!preview ? props.audiosrc : preview} />
+				<audio ref={audioRef} style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={!preview ? props.audiosrc : preview} />
 			}
 			<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
 				<Button style={{ width: '50%' }} color={props.audiosrc || preview ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>

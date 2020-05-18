@@ -65,7 +65,7 @@ export default function Group() {
 
 	useEffect(() => {
 		const controller = new AbortController();
-		fetch('http://localhost:3001/user/0/groups',
+		fetch(`${process.env.REACT_APP_API_HOST}/user/0/groups`,
 			{
 				method: 'GET',
 				headers: {
@@ -89,9 +89,7 @@ export default function Group() {
 	useEffect(() => {
 		const controller = new AbortController();
 		if (!id) {
-			if (groups.length > 0 && groups[0].id) {
-				history.push(`/group/${groups[0].id}`);
-			}
+			history.push(`/group/all`);
 		}
 		else {
 			fetchGroup(id, controller)
@@ -106,7 +104,7 @@ export default function Group() {
 	}, [groups, history, id]);
 
 	function handleCreate(e) {
-		fetch('http://localhost:3001/group/new',
+		fetch(`${process.env.REACT_APP_API_HOST}/group/new`,
 			{
 				method: 'POST',
 				headers: {
@@ -118,7 +116,7 @@ export default function Group() {
 				})
 			})
 			.then(res => {
-				fetch('http://localhost:3001/user/0/groups',
+				fetch(`${process.env.REACT_APP_API_HOST}/user/0/groups`,
 					{
 						method: 'GET',
 						headers: {
@@ -136,7 +134,7 @@ export default function Group() {
 	return (
 		<Paper className={styles.pane}>
 			<div style={{ display: 'flex' }}>
-				<Typography variant="h5"> {groups.length === 0 ? 'No Groups!' : group.name} </Typography>
+				<Typography variant="h5"> Groups </Typography>
 				<span style={{ flexGrow: 1 }} />
 				<Button ref={menuRef} onClick={() => setMenu(true)}> Select Group </Button>
 				<Menu
@@ -170,7 +168,7 @@ export default function Group() {
 			</div >
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>
-				<Typography variant="h5" style={{ flexGrow: 1 }}> Members </Typography>
+				<Typography variant="h5" style={{ flexGrow: 1 }}> {group.name} </Typography>
 				{(id !== 'all' && group.me === group.owner) &&
 					<Button color="primary" variant="outlined" className={styles.add} onClick={(e) => setBackdrop(true)}> Invite Members </Button>
 				}

@@ -26,7 +26,7 @@ function Invite(props) {
 	const [src, setSrc] = useState('');
 
 	function handleAccept(e) {
-		fetch(`http://localhost:3001/invite/${props.id}/accept`,
+		fetch(`${process.env.REACT_APP_API_HOST}/invite/${props.id}/accept`,
 			{
 				method: 'POST',
 				headers: {
@@ -37,7 +37,7 @@ function Invite(props) {
 	}
 
 	function handleReject(e) {
-		fetch(`http://localhost:3001/invite/${props.id}/reject`,
+		fetch(`${process.env.REACT_APP_API_HOST}/invite/${props.id}/reject`,
 			{
 				method: 'POST',
 				headers: {
@@ -48,7 +48,7 @@ function Invite(props) {
 	}
 
 	useEffect(() => {
-		fetch(`http://localhost:3001/invite/${props.id}`,
+		fetch(`${process.env.REACT_APP_API_HOST}/invite/${props.id}`,
 			{
 				method: 'GET',
 				headers: {
@@ -63,7 +63,7 @@ function Invite(props) {
 		const controller = new AbortController();
 
 		if (info.username) {
-			fetch(`http://localhost:3001/user/${info.username}/picture`,
+			fetch(`${process.env.REACT_APP_API_HOST}/user/${info.username}/picture`,
 				{
 					method: 'GET',
 					headers: {
@@ -97,7 +97,7 @@ export default function Invites() {
 	const [refresh, setRefresh] = useState(0);
 
 	useEffect(() => {
-		fetch('http://localhost:3001/user/0/invites',
+		fetch(`${process.env.REACT_APP_API_HOST}/user/0/invites`,
 			{
 				method: 'GET',
 				headers: {

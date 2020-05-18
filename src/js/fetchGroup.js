@@ -1,7 +1,7 @@
 import token from './token.js'
 
 async function fetchGroup(id, controller) {
-	return fetch(`http://localhost:3001/group/${id}`,
+	return fetch(`${process.env.REACT_APP_API_HOST}/group/${id}`,
 		{
 			method: 'GET',
 			headers: {

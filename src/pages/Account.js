@@ -69,7 +69,7 @@ export default function Account() {
 	useEffect(() => {
 		const controller = new AbortController();
 		if (edit === 2) {
-			fetch('http://localhost:3001/user/0/update',
+			fetch(`${process.env.REACT_APP_API_HOST}/user/0/update`,
 				{
 					method: 'PUT',
 					headers: {

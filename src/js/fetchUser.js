@@ -1,7 +1,7 @@
 import token from './token.js';
 
 async function fetchUser(id, controller) {
-	const jsonFetch = fetch(`http://localhost:3001/user/${id}`,
+	const jsonFetch = fetch(`${process.env.REACT_APP_API_HOST}/user/${id}`,
 		{
 			method: 'GET',
 			headers: {
@@ -11,7 +11,7 @@ async function fetchUser(id, controller) {
 		})
 		.then(res => res.json());
 
-	const pictureFetch = fetch(`http://localhost:3001/user/${id}/picture`,
+	const pictureFetch = fetch(`${process.env.REACT_APP_API_HOST}/user/${id}/picture`,
 		{
 			method: 'GET',
 			headers: {
@@ -21,7 +21,7 @@ async function fetchUser(id, controller) {
 		})
 		.then(res => res.blob());
 
-	const audioFetch = fetch(`http://localhost:3001/user/${id}/audio`,
+	const audioFetch = fetch(`${process.env.REACT_APP_API_HOST}/user/${id}/audio`,
 		{
 			method: 'GET',
 			headers: {
