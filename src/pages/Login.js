@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Redirect, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Redirect, Link, useLocation } from 'react-router-dom';
 import { makeStyles, Typography, Paper, Button, TextField, Divider } from '@material-ui/core';
 import { Alert } from '@material-ui/lab'
-import token from '../token.js'
+import token from '../js/token.js'
+import fetchUser from '../js/fetchUser.js'
 
 const useStyles = makeStyles({
 	pane: {
@@ -18,10 +19,21 @@ const useStyles = makeStyles({
 
 export default function Login() {
 	const styles = useStyles();
+	const location = useLocation();
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const [submitted, setSubmitted] = useState(false);
+	const [submitted, setSubmitted] = useState(0);
+
+	useEffect(() => {
+		if (token.get() || token.getRefresh()) {
+			// validate the refresh token
+			console.log('Has a refresh key. Logging in...');
+			token.set(sessionStorage.getItem('token'));
+			// if valid (given a JWT) set submitted to true
+			setSubmitted(1);
+		}
+	}, []);
 
 	function handleSubmit(e) {
 		if (username === "") {
@@ -36,7 +48,7 @@ export default function Login() {
 			username: username,
 			password: password
 		}
-		fetch('https://pronouncit.herokuapp.com/user/login', {
+		fetch(`${process.env.REACT_APP_API_HOST}/account/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -48,36 +60,59 @@ export default function Login() {
 					setError('');
 					return res.text();
 				}
-				else if (res.status !== 500) {
+				else if (res.status === 404) {
 					setError('wrong');
-					return '';
 				}
-				return '';
+				else if (res.status === 401) {
+					setError('unverified');
+				}
+				throw 'failed login';
 			})
 			.then(text => {
 				token.set(text);
-				if (token.get() !== '') {
+				token.setRefresh(text); // change with refresh key in future
+			})
+			.then(() => fetchUser(0, new AbortController()))
+			.then(user => {
+				if (token.get()) {
 					console.log('Token set successfully');
-					setSubmitted(true);
+					if (!user.audiosrc || !user.picturesrc) {
+						setSubmitted(2);
+					}
+					else {
+						setSubmitted(1);
+					}
 				}
-			});
+			})
+			.catch(err => console.log(err));
 	}
 
 	if (submitted) {
-		return <Redirect to='/' />
+		if (submitted === 1) {
+			if (location.state) {
+				return <Redirect to={location.state.from} />
+			}
+			else {
+				return <Redirect to="/" />
+			}
+		}
+		else if (submitted === 2) {
+			return <Redirect to='/start' />
+		}
 	}
 
 	return (
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Login </Typography>
 			<Divider />
-			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} >The username / password combination was invalid</Alert>
+			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} > The username / password combination was invalid </Alert>
+			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified </Alert>
 			<TextField className={styles.input} value={username} error={error === 'eUser' ? true : false} onChange={(e) => setUsername(e.target.value)} label="Username" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { document.getElementById('password').focus() } }} />
 			<TextField className={styles.input} id="password" value={password} error={error === 'ePass' ? true : false} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { handleSubmit() } }} />
 			<Button style={{ width: '100%', marginTop: '10px' }} variant="contained" color="primary" onClick={handleSubmit}> Login </Button>
-			<Link to="/register">
+			<Link to="/register" style={{ textDecoration: 'none' }}>
 				<Button style={{ width: '100%', marginTop: '10px' }} variant="contained" color="secondary">
 					Don't have an account? Sign-up here.
 				</Button>

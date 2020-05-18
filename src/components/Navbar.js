@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Container, Button, IconButton, Typography, makeStyles } from '@material-ui/core';
-import { InfoOutlined, HomeOutlined, AccountCircleOutlined, AddOutlined, PeopleAltOutlined } from '@material-ui/icons'
+import { InfoOutlined, HomeOutlined, AccountCircleOutlined, PeopleAltOutlined, MailOutline } from '@material-ui/icons'
 
 const useStyles = makeStyles(theme => ({
 	navbarSpacer: {
@@ -33,7 +33,7 @@ export default function Navbar() {
 				<Toolbar disableGutters>
 					<Link to="/">
 						<Button className={styles.title}>
-							<Typography variant="h5" style={{ display: 'flex', alignItems: 'center' }}>
+							<Typography variant="h5" style={{ display: 'flex', alignItems: 'center', textDecoration: 'underline', textDecorationColor: '#ffffff' }}>
 								pro <Dot /> noun <Dot /> cit
 							</Typography>
 						</Button>
@@ -50,9 +50,9 @@ export default function Navbar() {
 								<PeopleAltOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
-						<Link to="/invite">
+						<Link to="/invites">
 							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
-								<AddOutlined fontSize="inherit" color="inherit" />
+								<MailOutline fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
 						<Link to="/account">
@@ -68,7 +68,7 @@ export default function Navbar() {
 					</div>
 				</Toolbar>
 			</Container>
-		</AppBar>
+		</AppBar >
 	)
 }
 

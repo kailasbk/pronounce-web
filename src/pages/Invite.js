@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { makeStyles, Paper, Divider, Typography, TextField, Button, IconButton } from '@material-ui/core';
 import { DeleteOutline } from '@material-ui/icons';
+import token from '../js/token.js';
 
 const useStyles = makeStyles({
 	pane: {
 		padding: '10px',
-		paddingBottom: '0px'
+		paddingBottom: '5px',
 	},
 	emailBox: {
 		width: '100%',
 		marginTop: '10px'
 	},
-	submitButton: {
-		marginTop: '10px',
-		marginBottom: '10px',
+	button: {
+		marginTop: '5px',
+		marginBottom: '5px',
 		width: '100%'
 	},
 });
 
-export default function Invite() {
+export default function Invite(props) {
 	const styles = useStyles();
 	const [text, setText] = useState('');
 
@@ -35,6 +36,21 @@ export default function Invite() {
 	function handleChange(e) {
 		var newText = e.target.value;
 		setText(newText);
+	}
+
+	function handleSubmit(e) {
+		var emails = text.split(';');
+		fetch(`${process.env.REACT_APP_API_HOST}/group/${props.id}/invite`, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token.get()}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				emails: emails
+			})
+		});
+		props.handleClose();
 	}
 
 	function Preview(props) {
@@ -57,7 +73,7 @@ export default function Invite() {
 		});
 
 		return (
-			<div>
+			<div style={{ overflowY: 'scroll', height: '300px' }}>
 				{content}
 			</div>
 		)
@@ -67,9 +83,9 @@ export default function Invite() {
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Invite </Typography>
 			<Divider />
-			<TextField label="Group Name" className={styles.emailBox} />
 			<TextField multiline label="Emails" className={styles.emailBox} onChange={handleChange} value={text} />
-			<Button color="primary" variant="contained" className={styles.submitButton}> Send Invites </Button>
+			<Button color="primary" variant="contained" className={styles.button} onClick={handleSubmit}> Send Invites </Button>
+			<Button color="primary" variant="contained" className={styles.button} onClick={props.handleClose}> Cancel </Button>
 			<Preview text={text} />
 		</Paper>
 	);

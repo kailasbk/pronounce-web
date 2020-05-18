@@ -1,28 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import './index.css';
-import * as serviceWorker from './serviceWorker';
-import token from './token.js'
+import * as serviceWorker from './js/serviceWorker';
+import token from './js/token.js'
 
 import Home from './pages/Home';
 import About from './pages/About';
 import Account from './pages/Account';
-import Invite from './pages/Invite';
+import Invites from './pages/Invites';
 import Error from './pages/Error';
 import Group from './pages/Group';
+import Study from './pages/Study';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Start from './pages/Start';
+import Verify from './pages/Verify';
 
 import Navbar from './components/Navbar';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { Container } from '@material-ui/core';
+import { Container, CssBaseline } from '@material-ui/core';
+import { unstable_createMuiStrictModeTheme as createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+
+const theme = createMuiTheme({});
 
 function App() {
-	function ProtectedRoutes() {
-		if (token.get() === '') {
+	function ProtectedRoutes(props) {
+		if (!token.get()) {
 			console.log('Not logged in. Redirecting...');
-			return <Redirect to="/login" />
+			return <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
 		}
 		else {
 			return (
@@ -30,8 +34,10 @@ function App() {
 					<Switch>
 						<Route path="/" component={Home} exact />
 						<Route path="/account" component={Account} />
-						<Route path="/invite" component={Invite} />
-						<Route path="/group" component={Group} />
+						<Route path="/invites" component={Invites} />
+						<Route path="/group/:id?" component={Group} />
+						<Route path="/study/:id" component={Study} />
+						<Route path="/start" component={Start} />
 						<Route component={Error} />
 					</Switch>
 				</Route>
@@ -40,13 +46,14 @@ function App() {
 	}
 
 	return (
-		<div className="container">
+		<div className="container" style={{ minHeight: '100vh' }}>
 			<Router>
 				<Navbar />
-				<Container maxWidth="md" className="content">
+				<Container maxWidth="md" className="content" style={{ padding: '16px' }}>
 					<Switch>
 						<Route path="/register" component={Register} />
 						<Route path="/login" component={Login} />
+						<Route path="/verify/:id" component={Verify} />
 						<Route path="/about" component={About} />
 						<ProtectedRoutes />
 					</Switch>
@@ -58,8 +65,10 @@ function App() {
 
 ReactDOM.render(
 	<React.StrictMode>
-		<CssBaseline />
-		<App />
+		<ThemeProvider theme={theme}>
+			<CssBaseline />
+			<App />
+		</ThemeProvider>
 	</React.StrictMode >,
 	document.getElementById('root')
 );

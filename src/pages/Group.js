@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { makeStyles, Paper, Card, Divider, Typography, Grid, Avatar, Button, Badge, IconButton } from '@material-ui/core';
-import { PlayArrow, Stop } from '@material-ui/icons';
-import token from '../token.js';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useParams, useHistory } from 'react-router-dom';
+import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop } from '@material-ui/core';
+import Member from '../components/Member';
+import Invite from '../pages/Invite';
+import token from '../js/token.js';
+import fetchGroup from '../js/fetchGroup';
 
 const useStyles = makeStyles({
 	pane: {
@@ -35,182 +37,148 @@ const useStyles = makeStyles({
 	},
 	member: {
 		padding: '10px',
-		paddingTop: '0'
+		paddingTop: '0',
+		position: 'relative'
 	}
 });
 
 export default function Group() {
-	const [groupName, setGroupName] = useState('');
-	const [members, setMembers] = useState([
-		{
-			username: '',
-			firstname: '',
-			lastname: '',
-			email: '',
-			picturesrc: '',
-			audiosrc: ''
-		},
-		{
-			username: '',
-			firstname: '',
-			lastname: '',
-			email: '',
-			picturesrc: '',
-			audiosrc: ''
-		},
-		{
-			username: '',
-			firstname: '',
-			lastname: '',
-			email: '',
-			picturesrc: '',
-			audiosrc: ''
-		},
-	]);
 	const styles = useStyles();
+	const { id } = useParams();
+	const history = useHistory();
+	const [groups, setGroups] = useState([
+		{
+			id: '',
+			name: ''
+		}
+	])
+	const [group, setGroup] = useState({
+		name: '',
+		owner: '',
+		members: [''],
+		me: ''
+	});
+	const [isMenu, setMenu] = useState(false);
+	const menuRef = useRef(null);
+	const [newName, setName] = useState('');
+	const [backdrop, setBackdrop] = useState(false);
 
 	useEffect(() => {
-		fetch('https://pronouncit.herokuapp.com/group/all',
+		const controller = new AbortController();
+		fetch(`${process.env.REACT_APP_API_HOST}/user/0/groups`,
 			{
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token.get()}`
-				}
+				},
+				signal: controller.signal
 			})
 			.then(res => res.json())
-			.then((json) => {
-				const newMembers = json.members.map((member) => {
-					const newMember = {
-						username: member.username,
-						firstname: member.firstname,
-						lastname: member.lastname,
-						email: member.email,
-						picturesrc: '',
-						audiosrc: ''
-					};
-
-					if (member.picture !== null) {
-						const picture = new Blob([new Uint8Array(member.picture.data)], { type: 'image/jpeg' });
-						newMember.picturesrc = URL.createObjectURL(picture);
-					}
-
-					if (member.audio !== null) {
-						const audio = new Blob([new Uint8Array(member.audio.data)], { type: 'audio/m4a' });
-						newMember.audiosrc = URL.createObjectURL(audio);
-					}
-
-					return newMember;
-				});
-				setMembers(newMembers);
-				setGroupName(json.name);
+			.then(json => {
+				setGroups(json);
+			})
+			.catch(err => {
+				if (err.name === "AbortError") {
+					console.log('Aborted fetch request.');
+				}
 			});
 
-		return function cleanup() { };
+		return function cleanup() { controller.abort() };
 	}, []);
 
-	function Member(props) {
-		const [isPlaying, setPlaying] = useState(false);
-
-		function handlePlaying(e) {
-			if (props.member.audiosrc !== '') {
-				const audio = document.getElementById(`audio-${props.index}`);
-				if (isPlaying) {
-					audio.pause();
-					audio.currentTime = 0;
-				}
-				else {
-					audio.play();
-				}
-				setPlaying(!isPlaying);
-			}
+	useEffect(() => {
+		const controller = new AbortController();
+		if (!id) {
+			history.push(`/group/all`);
 		}
-
-		return (
-			<Grid item xs={12} sm={6} md={4}>
-				<Card className={styles.member}>
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						<Badge
-							style={{ margin: '10px', marginLeft: '0px' }}
-							overlap="circle"
-							anchorOrigin={{
-								vertical: 'bottom',
-								horizontal: 'right',
-							}}
-							badgeContent={
-								<div>
-									{props.member.audiosrc !== '' ?
-										<audio src={props.member.audiosrc} id={'audio-' + props.index} onEnded={() => setPlaying(false)}></audio>
-										:
-										<> </>
-									}
-									<IconButton onClick={handlePlaying} style={{ padding: '3px' }}>
-										{isPlaying ? <Stop /> : <PlayArrow />}
-									</IconButton>
-								</div>
-							}
-						>
-							<Avatar src={props.member.picturesrc} style={{ width: '60px', height: '60px' }} />
-						</Badge>
-						<Typography variant="h6"> {props.member.firstname} {props.member.lastname} </Typography>
-					</div >
-					<Divider />
-					<Typography style={{ marginTop: '10px' }}> {props.member.username} </Typography>
-					<Typography> <a href={'mailto:' + props.member.email}>{props.member.email}</a> </Typography>
-				</Card >
-			</Grid >
-		)
-	}
-
-	function Members(props) {
-		var content = props.members.map((member, index) => {
-			return <Member member={member} key={index} index={index} />
-		});
-
-		if (content.length === 0) {
-			return <Typography> No members! </Typography>
+		else {
+			fetchGroup(id, controller)
+				.then(group => setGroup(group))
+				.catch(err => {
+					if (err.name === "AbortError") {
+						console.log('Aborted fetch request.');
+					}
+				});
 		}
+		return function cleanup() { controller.abort() };
+	}, [groups, history, id]);
 
-		return (
-			<Grid container spacing={2} className={styles.members}>
-				{content}
-			</Grid>
-		)
-	}
-
-	function emails() {
-		var emailList = members.map((member, index) => {
-			if (index < members.length - 1) {
-				return (member.email + ';');
-			}
-			else {
-				return member.email;
-			}
-		});
-		var string = '';
-		emailList.map(email => {
-			string += email;
-			return 1;
-		});
-		return 'mailto: ' + string;
+	function handleCreate(e) {
+		fetch(`${process.env.REACT_APP_API_HOST}/group/new`,
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: newName
+				})
+			})
+			.then(res => {
+				fetch(`${process.env.REACT_APP_API_HOST}/user/0/groups`,
+					{
+						method: 'GET',
+						headers: {
+							'Authorization': `Bearer ${token.get()}`
+						},
+					})
+					.then(res => res.json())
+					.then(json => {
+						setGroups(json);
+						setName('');
+					});
+			});
 	}
 
 	return (
 		<Paper className={styles.pane}>
-			<Typography variant="h5"> {groupName} </Typography>
+			<div style={{ display: 'flex' }}>
+				<Typography variant="h5"> Groups </Typography>
+				<span style={{ flexGrow: 1 }} />
+				<Button ref={menuRef} onClick={() => setMenu(true)}> Select Group </Button>
+				<Menu
+					anchorEl={menuRef.current}
+					keepMounted
+					open={isMenu}
+					onClose={() => setMenu(false)}
+				>
+					<MenuItem key='all' onClick={() => { history.push('/group/all'); setMenu(false); }}>
+						<Typography style={{ width: '300px' }}> All Groups </Typography>
+					</MenuItem>
+					{groups.map(group => {
+						return (
+							<MenuItem key={group.id} onClick={() => { history.push(`/group/${group.id}`); setMenu(false); }}>
+								<Typography style={{ width: '300px' }}>{group.name}</Typography>
+							</MenuItem>
+						);
+					})}
+					<MenuItem key='create'>
+						<TextField key='field' value={newName} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.stopPropagation()} style={{ width: '200px' }}></TextField>
+						<Button variant="outlined" onClick={handleCreate} style={{ width: '80px', marginLeft: '20px' }}> Create </Button>
+					</MenuItem>
+				</Menu>
+			</div>
 			<Divider style={{ marginBottom: '10px' }} />
 			<div className={styles.actionBar}>
 				<Button color="primary" variant="contained" className={styles.study}>
-					<Link to="/study" style={{ all: 'inherit' }}> Study </Link>
+					<Link to={`/study/${id}`} style={{ all: 'inherit' }}> Study </Link>
 				</Button>
-				<Button color="secondary" variant="contained" className={styles.email} href={emails()}> Email </Button>
+				<Button color="secondary" variant="contained" className={styles.email} href=''> Email </Button>
 			</div >
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>
-				<Typography variant="h5" style={{ flexGrow: 1 }}> Members </Typography>
-				<Button color="primary" variant="outlined" className={styles.add}> Add Members </Button>
+				<Typography variant="h5" style={{ flexGrow: 1 }}> {group.name} </Typography>
+				{(id !== 'all' && group.me === group.owner) &&
+					<Button color="primary" variant="outlined" className={styles.add} onClick={(e) => setBackdrop(true)}> Invite Members </Button>
+				}
 			</div>
 			<Divider />
-			<Members members={members} />
+			<Grid container spacing={2} className={styles.members}>
+				<Member owner username={group.owner} key={group.owner} />
+				{group.members.map(member => <Member username={member} index={member} key={member} />)}
+			</Grid>
+			<Backdrop open={backdrop} style={{ zIndex: 1000 }}> <Invite handleClose={(e) => setBackdrop(false)} id={id} /> </Backdrop>
 		</Paper >
 	)
 }

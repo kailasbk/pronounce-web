@@ -14,6 +14,7 @@ export default function About() {
 		<Paper className={styles.aboutPane}>
 			<Typography variant="h5"> About this app </Typography>
 			<Divider />
+			<Typography> Name: Pronouncit App </Typography>
 			<Typography> Version: 0.1.0 </Typography>
 			<Typography> Author: Kailas Kahler </Typography>
 			<Typography> Contact: kailasbk230@gmail.com </Typography>
