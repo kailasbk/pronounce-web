@@ -94,7 +94,7 @@ export default function Account() {
 		}
 		return function cleanup() { controller.abort() }
 	}, [edit, info]);
-
+  
 	function handleLogout(e) {
 		token.clear();
 		history.push('/login', { from: '/' });
