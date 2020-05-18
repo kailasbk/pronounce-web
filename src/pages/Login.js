@@ -66,7 +66,7 @@ export default function Login() {
 				else if (res.status === 401) {
 					setError('unverified');
 				}
-				throw 'failed login';
+				throw new Error('failed login');
 			})
 			.then(text => {
 				token.set(text);
