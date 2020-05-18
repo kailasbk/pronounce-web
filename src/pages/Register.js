@@ -70,7 +70,7 @@ export default function Register() {
 				lastname: last,
 				email: email
 			}
-			fetch('http://localhost:3001/user/register',
+			fetch('https://pronouncit.herokuapp.com/user/register',
 				{
 					method: 'POST',
 					headers: {
