@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme, Button, ButtonGroup } from '@material-ui/core';
-import { PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever } from '@material-ui/icons';
+import { PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever, FiberManualRecord } from '@material-ui/icons';
 import token from '../js/token.js';
 
 function Recorder(props) {
@@ -107,7 +107,11 @@ function Recorder(props) {
 				</Button>
 				{!preview ?
 					<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord}>
-						<RecordVoiceOver />
+						{isRecording ?
+							<FiberManualRecord />
+							:
+							<RecordVoiceOver />
+						}
 					</Button>
 					:
 					[
