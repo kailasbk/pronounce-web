@@ -87,6 +87,11 @@ export default function Login() {
 			.catch(err => console.log(err));
 	}
 
+	function handleResend(e) {
+		e.preventDefault();
+		fetch(`${process.env.REACT_APP_API_HOST}/account/resend/${username}`, { method: 'POST' });
+	}
+
 	if (submitted) {
 		if (submitted === 1) {
 			if (location.state) {
@@ -106,7 +111,7 @@ export default function Login() {
 			<Typography variant="h5"> Login </Typography>
 			<Divider />
 			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} > The username / password combination was invalid </Alert>
-			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified </Alert>
+			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified. <a onClick={handleResend} href='/'>Resend?</a> </Alert>
 			<TextField className={styles.input} value={username} error={error === 'eUser' ? true : false} onChange={(e) => setUsername(e.target.value)} label="Username" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { document.getElementById('password').focus() } }} />
 			<TextField className={styles.input} id="password" value={password} error={error === 'ePass' ? true : false} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined"

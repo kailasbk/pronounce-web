@@ -15,6 +15,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Start from './pages/Start';
 import Verify from './pages/Verify';
+import Reset from './pages/Reset';
 
 import Navbar from './components/Navbar';
 import { Container, CssBaseline } from '@material-ui/core';
@@ -54,6 +55,7 @@ function App() {
 						<Route path="/register" component={Register} />
 						<Route path="/login" component={Login} />
 						<Route path="/verify/:id" component={Verify} />
+						<Route path="/reset/:type/:id" component={Reset} />
 						<Route path="/about" component={About} />
 						<ProtectedRoutes />
 					</Switch>

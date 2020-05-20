@@ -94,7 +94,7 @@ export default function Account() {
 		}
 		return function cleanup() { controller.abort() }
 	}, [edit, info]);
-  
+
 	function handleLogout(e) {
 		token.clear();
 		history.push('/login', { from: '/' });
@@ -124,6 +124,28 @@ export default function Account() {
 		else {
 			setEdit(0);
 		}
+	}
+
+	// give success feedback later on
+	function handleEmail(e) {
+		fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/email`,
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`
+				}
+			});
+	}
+
+	// give success feedback later on
+	function handlePassword(e) {
+		fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/password`,
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`
+				}
+			});
 	}
 
 	function Bar(props) {
@@ -195,8 +217,8 @@ export default function Account() {
 			<Divider />
 			<Bar field="Email" value={info.email} />
 			<Divider />
-			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained'> Change Email </Button>
-			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained'> Reset Password </Button>
+			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained' onClick={handleEmail}> Change Email </Button>
+			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handlePassword}> Reset Password </Button>
 			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handleLogout}> Logout </Button>
 		</Paper >
 	);
