@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField } from '@material-ui/core';
+import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField, useMediaQuery } from '@material-ui/core';
 import { Edit, Save } from '@material-ui/icons';
 import ProfileUpload from '../components/ProfileUpload'
 import Recorder from '../components/Recorder';
@@ -49,6 +49,7 @@ export default function Account() {
 		audiosrc: ''
 	});
 	const [edit, setEdit] = useState(0); // 0 is not editing
+	const bigUsername = useMediaQuery(theme.breakpoints.up('sm'));
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -162,11 +163,11 @@ export default function Account() {
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Account </Typography>
 			<Divider />
-			<div style={{ position: 'relative', display: 'flex', alignItems: 'center', margin: '20px' }}>
+			<div style={{ position: 'relative', display: 'flex', alignItems: 'center', margin: '10px' }}>
 				<ProfileUpload picturesrc={info.picturesrc} update={updatePicture} />
 				<span className={styles.spacer} />
-				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant="h4">{info.username}</Typography>
-				<IconButton onClick={handleEdit}> {edit ? <Save /> : <Edit />} </IconButton>
+				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant={bigUsername ? 'h4' : 'h5'}>{info.username}</Typography>
+				<IconButton onClick={handleEdit} style={{ padding: '6px' }}> {edit ? <Save /> : <Edit />} </IconButton>
 				<span className={styles.spacer} />
 			</div>
 			{edit ?
