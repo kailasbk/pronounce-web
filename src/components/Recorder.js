@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTheme, Button, ButtonGroup } from '@material-ui/core';
 import { PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever, FiberManualRecord } from '@material-ui/icons';
 import token from '../js/token.js';
+import '../css/pulse.css';
 
 function Recorder(props) {
 	const theme = useTheme();
@@ -70,9 +71,14 @@ function Recorder(props) {
 	function handleRecord(e) {
 		if (recorder === null) {
 			navigator.mediaDevices.getUserMedia({ audio: true })
-				.then(stream => setRecorder(new MediaRecorder(stream)))
-				.catch(error => console.log(error));
-			setRecording(true);
+				.then(stream => {
+					setRecorder(new MediaRecorder(stream));
+					setRecording(true);
+				})
+				.catch(error => {
+					setRecorder(null);
+					setRecording(false);
+				});
 		}
 		else if (isRecording) {
 			recorder.stop();
@@ -108,7 +114,7 @@ function Recorder(props) {
 				{!preview ?
 					<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord}>
 						{isRecording ?
-							<FiberManualRecord />
+							<FiberManualRecord className="pulse" />
 							:
 							<RecordVoiceOver />
 						}
