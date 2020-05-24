@@ -10,7 +10,8 @@ import Account from './pages/Account';
 import Invites from './pages/Invites';
 import Error from './pages/Error';
 import Group from './pages/Group';
-import Study from './pages/Study';
+import Flashcards from './pages/Flashcards';
+import Learn from './pages/Learn';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Start from './pages/Start';
@@ -37,7 +38,8 @@ function App() {
 						<Route path="/account" component={Account} />
 						<Route path="/invites" component={Invites} />
 						<Route path="/group/:id?" component={Group} />
-						<Route path="/study/:id" component={Study} />
+						<Route path="/flashcards/:id" component={Flashcards} />
+						<Route path="/learn/:id" component={Learn} />
 						<Route path="/start" component={Start} />
 						<Route component={Error} />
 					</Switch>

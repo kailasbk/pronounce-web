@@ -6,7 +6,7 @@ import Invite from '../pages/Invite';
 import token from '../js/token.js';
 import fetchGroup from '../js/fetchGroup';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
 	pane: {
 		padding: '10px'
 	},
@@ -18,19 +18,16 @@ const useStyles = makeStyles({
 		display: 'flex',
 		alignItems: 'center'
 	},
-	study: {
+	button: {
+		[theme.breakpoints.down('xs')]: {
+			flexBasis: '100%'
+		},
 		flexGrow: 1,
-		minWidth: '200px',
-		flexBasis: '30%'
+		flexBasis: '33%'
 	},
 	add: {
 		display: 'inline-block',
 		margin: '5px'
-	},
-	email: {
-		flexGrow: 1,
-		minWidth: '200px',
-		flexBasis: '30%'
 	},
 	members: {
 		marginTop: '10px'
@@ -40,7 +37,7 @@ const useStyles = makeStyles({
 		paddingTop: '0',
 		position: 'relative'
 	}
-});
+}));
 
 export default function Group() {
 	const styles = useStyles();
@@ -161,10 +158,13 @@ export default function Group() {
 			</div>
 			<Divider style={{ marginBottom: '10px' }} />
 			<div className={styles.actionBar}>
-				<Button color="primary" variant="contained" className={styles.study}>
-					<Link to={`/study/${id}`} style={{ all: 'inherit' }}> Study </Link>
+				<Button color="primary" variant="contained" className={styles.button}>
+					<Link to={`/flashcards/${id}`} style={{ all: 'inherit' }}> Flashcards </Link>
 				</Button>
-				<Button color="secondary" variant="contained" className={styles.email} href=''> Email </Button>
+				<Button color="primary" variant="contained" className={styles.button}>
+					<Link to={`/learn/${id}`} style={{ all: 'inherit' }}> Learn </Link>
+				</Button>
+				<Button color="secondary" variant="contained" className={styles.button} href=''> Email </Button>
 			</div >
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>

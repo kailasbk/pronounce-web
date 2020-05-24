@@ -26,10 +26,6 @@ function Flashcard(props) {
 		}
 	});
 
-	function handleRecord(e) {
-		e.stopPropagation();
-	}
-
 	return (
 		<div
 			className="flip-card"
@@ -62,19 +58,22 @@ function Flashcard(props) {
 					{props.settings.name &&
 						<Typography variant="h5" style={{ margin: '5px' }}> {info.firstname} {info.lastname} </Typography>
 					}
-					<Button style={{ margin: '5px', height: '40px' }} color="primary" variant="contained" onClick={handleRecord}> Pronouncit! </Button>
 				</div>
 				<div className="flip-card-back" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 					<Avatar style={{ height: '200px', width: '200px', margin: '5px' }} src={info.picturesrc}></Avatar>
 					<Typography variant="h5" style={{ margin: '5px' }}> {info.firstname} {info.lastname} </Typography>
-					<audio style={{ margin: '5px', height: '40px' }} src={info.audiosrc} controls></audio>
+					{info.audiosrc ?
+						<audio style={{ margin: '5px', height: '40px' }} src={info.audiosrc} controls></audio>
+						:
+						<Typography style={{ margin: '5px', height: '40px' }}> No audio</Typography>
+					}
 				</div>
 			</div>
 		</div>
 	);
 }
 
-function Study() {
+export default function Flashcards() {
 	const { id } = useParams();
 	const [members, setMembers] = useState([]);
 	const [index, setIndex] = useState(0);
@@ -133,7 +132,7 @@ function Study() {
 
 	return (
 		<Paper style={{ padding: '10px', minHeight: '500px', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }} onKeyDown={handleArrows} tabIndex="0">
-			<Typography variant="h5"> Study </Typography>
+			<Typography variant="h5"> Flashcards </Typography>
 			<Divider />
 			<ToggleButtonGroup style={{ marginTop: '10px', justifyContent: 'center' }}>
 				<ToggleButton value="name" selected={settings.name} onClick={() => setSettings(old => ({ ...old, name: !settings.name }))}> <DescriptionOutlined /> </ToggleButton>
@@ -154,5 +153,3 @@ function Study() {
 		</Paper >
 	);
 }
-
-export default Study;
