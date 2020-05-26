@@ -15,6 +15,7 @@ const useStyles = makeStyles(theme => ({
 		flexWrap: 'wrap'
 	},
 	membersBar: {
+		minHeight: '50px',
 		display: 'flex',
 		alignItems: 'center'
 	},
