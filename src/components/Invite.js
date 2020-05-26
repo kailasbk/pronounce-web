@@ -81,7 +81,7 @@ export default function Invite(props) {
 
 	return (
 		<Paper className={styles.pane}>
-			<Typography variant="h5"> Invite </Typography>
+			<Typography variant="h5"> Invite (by email) </Typography>
 			<Divider />
 			<TextField multiline label="Emails" className={styles.emailBox} onChange={handleChange} value={text} />
 			<Button color="primary" variant="contained" className={styles.button} onClick={handleSubmit}> Send Invites </Button>
