@@ -33,13 +33,8 @@ async function fetchUser(id, controller) {
 
 	const [json, picture, audio] = await Promise.all([jsonFetch, pictureFetch, audioFetch]);
 
-	let audiosrc;
-	if (audio.size === 0) {
-		audiosrc = '';
-	}
-	else {
-		audiosrc = URL.createObjectURL(audio)
-	}
+	const audiosrc = audio.size === 0 ? '' : URL.createObjectURL(audio);
+	const picturesrc = picture.size === 0 ? '' : URL.createObjectURL(picture);
 
 	return {
 		username: json.username,
@@ -48,7 +43,7 @@ async function fetchUser(id, controller) {
 		lastname: json.lastname,
 		pronouns: json.pronouns,
 		email: json.email,
-		picturesrc: URL.createObjectURL(picture),
+		picturesrc: picturesrc,
 		audiosrc: audiosrc
 	}
 }
