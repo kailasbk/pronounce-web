@@ -1,24 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme, Button, ButtonGroup } from '@material-ui/core';
 import { PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever, FiberManualRecord } from '@material-ui/icons';
 import token from '../js/token.js';
+import audio from '../js/audio';
 import '../css/pulse.css';
 
 function Recorder(props) {
 	const theme = useTheme();
-	const [preview, setPreview] = useState('');
 	const [isPlaying, setPlaying] = useState(false);
 	const [isRecording, setRecording] = useState(false);
 	const [recorder, setRecorder] = useState(null);
-	const audioRef = useRef(null);
+	const [audioEl, setAudio] = useState(null);
+	const [previewSource, setPreviewSource] = useState(null);
+
+	useEffect(() => {
+		if (props.audiosrc) {
+			setAudio(new Audio(props.audiosrc));
+		}
+	}, [props.audiosrc]);
+
+	useEffect(() => {
+		if (audioEl !== null) {
+			audioEl.onended = (e) => {
+				setPlaying(false);
+			}
+		}
+	}, [audioEl]);
 
 	async function handleUploadAudio(e) {
 		const data = new FormData();
-		await fetch(preview)
-			.then(res => res.blob())
+		await audio.recordBuffer(previewSource.buffer)
 			.then(blob => data.append('file', blob));
 
-		const audio = await fetch(`${process.env.REACT_APP_API_HOST}/user/0/audio`,
+		const audioSrc = await fetch(`${process.env.REACT_APP_API_HOST}/user/0/audio`,
 			{
 				method: 'PUT',
 				headers: {
@@ -46,23 +60,30 @@ function Recorder(props) {
 				return new Blob();
 			});
 
-		props.update(URL.createObjectURL(audio));
+		props.update(URL.createObjectURL(audioSrc));
 	}
 
 	function handleDeletePreview(e) {
-		URL.revokeObjectURL(preview);
-		setPreview('');
+		setPreviewSource(null);
 	}
 
-	function handleAudio(e) {
-		if (props.audiosrc || preview) {
-			const audio = audioRef.current;
+	function handlePlaying(e) {
+		if (previewSource) {
 			if (isPlaying) {
-				audio.pause();
-				audio.currentTime = 0;
+				previewSource.stop();
 			}
 			else {
-				audio.play();
+				previewSource.start();
+			}
+			setPlaying(!isPlaying);
+		}
+		else if (audioEl) {
+			if (isPlaying) {
+				audioEl.pause();
+				audioEl.currentTime = 0;
+			}
+			else {
+				audioEl.play();
 			}
 			setPlaying(!isPlaying);
 		}
@@ -72,10 +93,11 @@ function Recorder(props) {
 		if (recorder === null) {
 			navigator.mediaDevices.getUserMedia({ audio: true })
 				.then(stream => {
-					setRecorder(new MediaRecorder(stream));
+					setRecorder(new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' }));
 					setRecording(true);
 				})
 				.catch(error => {
+					console.log(error);
 					setRecorder(null);
 					setRecording(false);
 				});
@@ -90,28 +112,35 @@ function Recorder(props) {
 
 	useEffect(() => {
 		if (recorder !== null) {
-			recorder.ondataavailable = (e) => {
-				URL.revokeObjectURL(preview);
-				const url = URL.createObjectURL(e.data);
-				setPreview(url);
+			recorder.ondataavailable = async (e) => {
+				const array = await e.data.arrayBuffer();
+				const audioBuffer = await audio.ctx.decodeAudioData(array);
+				const truncated = audio.truncateBuffer(audioBuffer);
+				setPreviewSource(audio.connectBuffer(truncated));
 			};
 
 			if (isRecording) {
 				recorder.start();
 			}
 		}
-	}, [recorder, isRecording, preview]);
+	}, [recorder, isRecording]);
+
+	useEffect(() => {
+		if (previewSource !== null) {
+			previewSource.onended = (e) => {
+				setPreviewSource(audio.connectBuffer(previewSource.buffer));
+				setPlaying(false);
+			}
+		}
+	}, [previewSource]);
 
 	return (
 		<>
-			{(props.audiosrc || preview) &&
-				<audio ref={audioRef} style={{ display: 'none' }} onEnded={() => setPlaying(false)} src={!preview ? props.audiosrc : preview} />
-			}
 			<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
-				<Button style={{ width: '50%' }} color={props.audiosrc || preview ? 'primary' : 'secondary'} variant='contained' onClick={handleAudio}>
+				<Button style={{ width: '50%' }} color={audioEl || previewSource ? 'primary' : 'secondary'} variant='contained' onClick={handlePlaying}>
 					{isPlaying ? <Stop /> : <PlayArrow />}
 				</Button>
-				{!preview ?
+				{!previewSource ?
 					<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord}>
 						{isRecording ?
 							<FiberManualRecord className="pulse" />

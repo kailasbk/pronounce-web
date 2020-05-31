@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Paper, Typography, Divider, ButtonGroup, Button, Avatar } from '@material-ui/core';
+import { Paper, Typography, Divider, ButtonGroup, Button, Avatar, Slider } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Shuffle, AccountCircle, DescriptionOutlined } from '@material-ui/icons';
+import { Shuffle, AccountCircle, DescriptionOutlined, PlayArrow, Stop } from '@material-ui/icons';
 import { useParams } from 'react-router-dom';
 import fetchGroup from '../js/fetchGroup.js'
 import fetchUser from '../js/fetchUser.js'
@@ -9,8 +9,11 @@ import '../css/flipcard.css'
 
 function Flashcard(props) {
 	const [flipped, setFlipped] = useState(false);
-	const [info, setInfo] = useState({}); // update fields
+	const [info, setInfo] = useState({});
+	const [playbackSpeed, setSpeed] = useState(0);
+	const [isPlaying, setPlaying] = useState(false);
 	const cardRef = useRef(null);
+	const audioRef = useRef(null);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -25,6 +28,31 @@ function Flashcard(props) {
 			cardRef.current.focus();
 		}
 	});
+
+	useEffect(() => {
+		if (audioRef.current) {
+			audioRef.current.playbackRate = 2 ** playbackSpeed;
+		}
+	}, [playbackSpeed]);
+
+	function handleSpeed(e, value) {
+		setSpeed(value);
+	}
+
+	function handlePlaying(e) {
+		e.stopPropagation();
+		if (audioRef.current) {
+			if (isPlaying) {
+				audioRef.current.pause();
+				audioRef.current.currentTime = 0;
+				setPlaying(false);
+			}
+			else {
+				audioRef.current.play();
+				setPlaying(true);
+			}
+		}
+	}
 
 	return (
 		<div
@@ -63,9 +91,23 @@ function Flashcard(props) {
 					<Avatar style={{ height: '200px', width: '200px', margin: '5px' }} src={info.picturesrc}></Avatar>
 					<Typography variant="h5" style={{ margin: '5px' }}> {info.firstname} {info.lastname} </Typography>
 					{info.audiosrc ?
-						<audio style={{ margin: '5px', height: '40px' }} src={info.audiosrc} controls></audio>
+						<div>
+							<audio src={info.audiosrc} ref={audioRef} onEnded={() => setPlaying(false)} />
+							<Slider
+								value={playbackSpeed}
+								onChange={handleSpeed}
+								onClick={(e) => e.stopPropagation()}
+								valueLabelDisplay="auto"
+								valueLabelFormat={(x) => `x${x}`}
+								min={-2}
+								step={1}
+								max={1}
+								scale={(x) => 2 ** x}
+							/>
+							<Button onClick={handlePlaying}> {!isPlaying ? <PlayArrow /> : <Stop />} </Button>
+						</div>
 						:
-						<Typography style={{ margin: '5px', height: '40px' }}> No audio</Typography>
+						<Typography> No audio</Typography>
 					}
 				</div>
 			</div>

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Paper, Typography, Divider, ButtonGroup, Button, Avatar } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Shuffle, AccountCircle, DescriptionOutlined } from '@material-ui/icons';
+import { Shuffle, AccountCircle, DescriptionOutlined, ThumbUp, ThumbDown, Help } from '@material-ui/icons';
 import { useParams } from 'react-router-dom';
 import fetchGroup from '../js/fetchGroup.js';
 import fetchUser from '../js/fetchUser.js';
-import audio from '../js/audio.ts'
+import audio from '../js/audio'
+import token from '../js/token.js'
 import '../css/pulse.css';
 
 function Card(props) {
@@ -36,10 +37,11 @@ function Card(props) {
 		if (recorder === null) {
 			navigator.mediaDevices.getUserMedia({ audio: true })
 				.then(stream => {
-					setRecorder(new MediaRecorder(stream));
+					setRecorder(new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' }));
 					setRecording(true);
 				})
 				.catch(error => {
+					console.log(error);
 					setRecorder(null);
 					setRecording(false);
 				});
@@ -55,9 +57,9 @@ function Card(props) {
 	useEffect(() => {
 		if (recorder !== null) {
 			recorder.ondataavailable = async (e) => {
-				const ctx = new AudioContext();
+				// audio.csvFromBlob(e.data);
 				const array = await e.data.arrayBuffer();
-				const audioBuffer = await ctx.decodeAudioData(array);
+				const audioBuffer = await audio.ctx.decodeAudioData(array);
 				const truncated = audio.truncateBuffer(audioBuffer);
 				setAnswerSource(audio.connectBuffer(truncated));
 				setAnswered(true);
@@ -110,6 +112,31 @@ function Card(props) {
 				setPlaying('');
 			}
 		}
+	}
+
+	function handleCorrect(e) {
+		setAnswered(false);
+	}
+
+	function handleWrong(e) {
+		setAnswered(false);
+	}
+
+	async function handleFeedback(e) {
+		const data = new FormData();
+		audio.recordBuffer(answerSource.buffer)
+			.then(blob => {
+				data.append('audio', blob);
+				data.append('username', info.username);
+				fetch(`${process.env.REACT_APP_API_HOST}/learn/feedback/request`,
+					{
+						method: 'POST',
+						headers: {
+							'Authorization': `Bearer ${token.get()}`
+						},
+						body: data
+					});
+			});
 	}
 
 	return (
@@ -169,14 +196,15 @@ function Card(props) {
 						</Button>
 					</ButtonGroup>
 					<Divider style={{ width: '100%', maxWidth: '500px', marginTop: '10px', marginBottom: '10px' }} />
-					<ButtonGroup style={{ width: '100%', maxWidth: '500px' }}>
-						<Button style={{ flexBasis: '33.333333%' }} variant="contained" onClick={() => setAnswered(false)}> Got it! </Button>
-						<Button style={{ flexBasis: '33.333333%' }} variant="contained" onClick={() => setAnswered(false)}> Again! </Button>
-						<Button style={{ flexBasis: '33.333333%' }} variant="contained" onClick={() => setAnswered(false)}> Later... </Button>
-					</ButtonGroup>
+					<Typography> How did you do? </Typography>
+					<div style={{ display: 'flex', width: '100%', maxWidth: '500px' }}>
+						<Button style={{ flexBasis: '33.333333%' }} variant="text" onClick={handleCorrect}> <ThumbUp /> </Button>
+						<Button style={{ flexBasis: '33.333333%' }} variant="text" onClick={handleWrong}> <ThumbDown /> </Button>
+						<Button style={{ flexBasis: '33.333333%' }} variant="text" onClick={handleFeedback}> <Help /> </Button>
+					</div>
 				</div>
 			}
-		</div>
+		</div >
 	);
 }
 

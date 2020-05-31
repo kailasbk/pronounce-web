@@ -1,5 +1,6 @@
+const ctx = new AudioContext();
+
 function truncateBuffer(buffer: AudioBuffer): AudioBuffer {
-	const ctx = new AudioContext();
 	console.log('original:', buffer);
 	let channels = [];
 	for (let i = 0; i < buffer.numberOfChannels; i++) {
@@ -8,7 +9,7 @@ function truncateBuffer(buffer: AudioBuffer): AudioBuffer {
 
 	// implement reduce for scalability
 	const max = Math.max(...channels[0]);
-	console.log(max);
+	console.log('maximum amplitude: ', max);
 
 	const cutoff = max / 20;
 
@@ -28,7 +29,7 @@ function truncateBuffer(buffer: AudioBuffer): AudioBuffer {
 		}
 	}
 
-	console.log(start + ' to ' + end);
+	console.log('range used: ' + start + ' to ' + end);
 	channels = channels.map(channel => channel.subarray(start, end));
 
 	let newBuffer = ctx.createBuffer(channels.length, channels[0].length, buffer.sampleRate);
@@ -41,7 +42,6 @@ function truncateBuffer(buffer: AudioBuffer): AudioBuffer {
 }
 
 function connectBuffer(buffer: AudioBuffer): AudioBufferSourceNode {
-	const ctx = new AudioContext();
 	let source = ctx.createBufferSource();
 	source.buffer = buffer;
 	source.connect(ctx.destination);
@@ -50,7 +50,6 @@ function connectBuffer(buffer: AudioBuffer): AudioBufferSourceNode {
 }
 
 function recordBuffer(buffer: AudioBuffer): Promise<Blob> {
-	const ctx = new AudioContext();
 	let source = ctx.createBufferSource();
 	const dest = ctx.createMediaStreamDestination();
 	source.buffer = buffer;
@@ -74,6 +73,19 @@ function recordBuffer(buffer: AudioBuffer): Promise<Blob> {
 	return promise;
 }
 
-const audio = { truncateBuffer, recordBuffer, connectBuffer };
+async function csvFromBlob(blob: Blob) {
+	const array = await blob.arrayBuffer();
+	const audioBuffer = await ctx.decodeAudioData(array);
+	const data = audioBuffer.getChannelData(0);
+	let csv: string = '';
+	csv += 'index, value\n';
+	data.forEach((value, index) => {
+		csv += `${index}, ${value}\n`;
+	});
+	const file = new File([csv], 'data.csv');
+	window.open(URL.createObjectURL(file));
+}
+
+const audio = { ctx, truncateBuffer, recordBuffer, connectBuffer, csvFromBlob };
 
 export default audio;
