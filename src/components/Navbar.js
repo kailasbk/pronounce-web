@@ -50,7 +50,7 @@ export default function Navbar() {
 								<PeopleAltOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
-						<Link to="/invites">
+						<Link to="/inbox">
 							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
 								<MailOutline fontSize="inherit" color="inherit" />
 							</IconButton>

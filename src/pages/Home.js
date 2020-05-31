@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Divider, makeStyles, List, ListItem, Button } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
-import Invites from './Invites';
+import Invites from './Inbox';
 import token from '../js/token.js';
 
 const useStyles = makeStyles({
