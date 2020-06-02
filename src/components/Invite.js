@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles, Paper, Divider, Typography, TextField, Button, IconButton } from '@material-ui/core';
-import { DeleteOutline } from '@material-ui/icons';
+import { DeleteOutline, Close } from '@material-ui/icons';
 import token from '../js/token.js';
 
 const useStyles = makeStyles({
@@ -49,8 +49,17 @@ export default function Invite(props) {
 			body: JSON.stringify({
 				emails: emails
 			})
-		});
-		props.handleClose();
+		})
+			.then(res => {
+				if (res.ok) {
+					handleClose();
+				}
+			})
+	}
+
+	function handleClose(e) {
+		setText('');
+		props.close();
 	}
 
 	function Preview(props) {
@@ -81,11 +90,17 @@ export default function Invite(props) {
 
 	return (
 		<Paper className={styles.pane}>
-			<Typography variant="h5"> Invite </Typography>
+			<div style={{ display: 'flex', alignItems: 'center' }}>
+				<Typography variant="h5"> Invite (by email) </Typography>
+				<span style={{ flexGrow: 1 }} />
+				<IconButton onClick={() => props.close()}>
+					<Close />
+				</IconButton>
+			</div>
 			<Divider />
 			<TextField multiline label="Emails" className={styles.emailBox} onChange={handleChange} value={text} />
 			<Button color="primary" variant="contained" className={styles.button} onClick={handleSubmit}> Send Invites </Button>
-			<Button color="primary" variant="contained" className={styles.button} onClick={props.handleClose}> Cancel </Button>
+			<Button color="primary" variant="contained" className={styles.button} onClick={handleClose}> Cancel </Button>
 			<Preview text={text} />
 		</Paper>
 	);

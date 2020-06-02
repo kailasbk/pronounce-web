@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop } from '@material-ui/core';
+import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop, useTheme } from '@material-ui/core';
 import Member from '../components/Member';
-import Invite from '../pages/Invite';
+import Invite from '../components/Invite';
 import token from '../js/token.js';
 import fetchGroup from '../js/fetchGroup';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
 	pane: {
 		padding: '10px'
 	},
@@ -15,22 +15,20 @@ const useStyles = makeStyles({
 		flexWrap: 'wrap'
 	},
 	membersBar: {
+		minHeight: '50px',
 		display: 'flex',
 		alignItems: 'center'
 	},
-	study: {
+	button: {
+		[theme.breakpoints.down('xs')]: {
+			flexBasis: '100%'
+		},
 		flexGrow: 1,
-		minWidth: '200px',
-		flexBasis: '30%'
+		flexBasis: '33%'
 	},
 	add: {
 		display: 'inline-block',
 		margin: '5px'
-	},
-	email: {
-		flexGrow: 1,
-		minWidth: '200px',
-		flexBasis: '30%'
 	},
 	members: {
 		marginTop: '10px'
@@ -40,10 +38,11 @@ const useStyles = makeStyles({
 		paddingTop: '0',
 		position: 'relative'
 	}
-});
+}));
 
 export default function Group() {
 	const styles = useStyles();
+	const theme = useTheme();
 	const { id } = useParams();
 	const history = useHistory();
 	const [groups, setGroups] = useState([
@@ -62,6 +61,7 @@ export default function Group() {
 	const menuRef = useRef(null);
 	const [newName, setName] = useState('');
 	const [backdrop, setBackdrop] = useState(false);
+	const [emails, setEmails] = useState([]);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -99,6 +99,27 @@ export default function Group() {
 						console.log('Aborted fetch request.');
 					}
 				});
+
+			if (id !== 'all') {
+				fetch(`${process.env.REACT_APP_API_HOST}/group/${id}/emails`,
+					{
+						method: 'GET',
+						headers: {
+							'Authorization': `Bearer ${token.get()}`
+						},
+						signal: controller.signal
+					})
+					.then(res => res.json())
+					.then(emails => setEmails(emails))
+					.catch(err => {
+						if (err.name === "AbortError") {
+							console.log('Aborted fetch request.');
+						}
+					});
+			}
+			else {
+				setEmails([]);
+			}
 		}
 		return function cleanup() { controller.abort() };
 	}, [groups, history, id]);
@@ -161,10 +182,13 @@ export default function Group() {
 			</div>
 			<Divider style={{ marginBottom: '10px' }} />
 			<div className={styles.actionBar}>
-				<Button color="primary" variant="contained" className={styles.study}>
-					<Link to={`/study/${id}`} style={{ all: 'inherit' }}> Study </Link>
+				<Button style={{ backgroundColor: theme.palette.success.main }} variant="contained" className={styles.button}>
+					<Link to={`/flashcards/${id}`} style={{ all: 'inherit' }}> Flashcards </Link>
 				</Button>
-				<Button color="secondary" variant="contained" className={styles.email} href=''> Email </Button>
+				<Button style={{ backgroundColor: theme.palette.warning.main }} variant="contained" className={styles.button}>
+					<Link to={`/learn/${id}`} style={{ all: 'inherit' }}> Learn </Link>
+				</Button>
+				<Button style={{ backgroundColor: theme.palette.info.main }} variant="contained" className={styles.button} href={`mailto: ${emails.join(';')}`}> Email </Button>
 			</div >
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>
@@ -174,11 +198,11 @@ export default function Group() {
 				}
 			</div>
 			<Divider />
-			<Grid container spacing={2} className={styles.members}>
+			<Grid container spacing={1} className={styles.members}>
 				<Member owner username={group.owner} key={group.owner} />
 				{group.members.map(member => <Member username={member} index={member} key={member} />)}
 			</Grid>
-			<Backdrop open={backdrop} style={{ zIndex: 1000 }}> <Invite handleClose={(e) => setBackdrop(false)} id={id} /> </Backdrop>
+			<Backdrop open={backdrop} style={{ zIndex: 1000 }}> <Invite close={(e) => setBackdrop(false)} id={id} /> </Backdrop>
 		</Paper >
 	)
 }

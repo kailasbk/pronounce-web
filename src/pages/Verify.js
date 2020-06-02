@@ -8,7 +8,7 @@ const useStyles = makeStyles({
 	}
 });
 
-export default function About() {
+export default function Verify() {
 	const styles = useStyles();
 	const { id } = useParams();
 	const [done, setDone] = useState(0);

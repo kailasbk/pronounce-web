@@ -27,11 +27,32 @@ export default function Login() {
 
 	useEffect(() => {
 		if (token.get() || token.getRefresh()) {
-			// validate the refresh token
 			console.log('Has a refresh key. Logging in...');
-			token.set(sessionStorage.getItem('token'));
-			// if valid (given a JWT) set submitted to true
-			setSubmitted(1);
+			fetch(`${process.env.REACT_APP_API_HOST}/account/refresh`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						id: token.getRefresh()
+					})
+				})
+				.then(res => {
+					if (res.ok) {
+						return res.json();
+					}
+					throw new Error('failed refresh');
+				})
+				.then(json => {
+					token.set(json.token);
+					token.setRefresh(json.refresh);
+					setSubmitted(1);
+				})
+				.catch(err => {
+					console.log(err);
+					token.clear();
+				});
 		}
 	}, []);
 
@@ -58,7 +79,7 @@ export default function Login() {
 			.then(res => {
 				if (res.ok) {
 					setError('');
-					return res.text();
+					return res.json();
 				}
 				else if (res.status === 404) {
 					setError('wrong');
@@ -68,9 +89,9 @@ export default function Login() {
 				}
 				throw new Error('failed login');
 			})
-			.then(text => {
-				token.set(text);
-				token.setRefresh(text); // change with refresh key in future
+			.then(json => {
+				token.set(json.token);
+				token.setRefresh(json.refresh);
 			})
 			.then(() => fetchUser(0, new AbortController()))
 			.then(user => {
@@ -85,6 +106,11 @@ export default function Login() {
 				}
 			})
 			.catch(err => console.log(err));
+	}
+
+	function handleResend(e) {
+		e.preventDefault();
+		fetch(`${process.env.REACT_APP_API_HOST}/account/resend/${username}`, { method: 'POST' });
 	}
 
 	if (submitted) {
@@ -106,7 +132,7 @@ export default function Login() {
 			<Typography variant="h5"> Login </Typography>
 			<Divider />
 			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} > The username / password combination was invalid </Alert>
-			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified </Alert>
+			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified. <a onClick={handleResend} href='/'>Resend?</a> </Alert>
 			<TextField className={styles.input} value={username} error={error === 'eUser' ? true : false} onChange={(e) => setUsername(e.target.value)} label="Username" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { document.getElementById('password').focus() } }} />
 			<TextField className={styles.input} id="password" value={password} error={error === 'ePass' ? true : false} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined"

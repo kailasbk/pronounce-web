@@ -7,14 +7,16 @@ import token from './js/token.js'
 import Home from './pages/Home';
 import About from './pages/About';
 import Account from './pages/Account';
-import Invites from './pages/Invites';
+import Inbox from './pages/Inbox';
 import Error from './pages/Error';
 import Group from './pages/Group';
-import Study from './pages/Study';
+import Flashcards from './pages/Flashcards';
+import Learn from './pages/Learn';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Start from './pages/Start';
 import Verify from './pages/Verify';
+import Reset from './pages/Reset';
 
 import Navbar from './components/Navbar';
 import { Container, CssBaseline } from '@material-ui/core';
@@ -34,9 +36,10 @@ function App() {
 					<Switch>
 						<Route path="/" component={Home} exact />
 						<Route path="/account" component={Account} />
-						<Route path="/invites" component={Invites} />
+						<Route path="/inbox" component={Inbox} />
 						<Route path="/group/:id?" component={Group} />
-						<Route path="/study/:id" component={Study} />
+						<Route path="/flashcards/:id" component={Flashcards} />
+						<Route path="/learn/:id" component={Learn} />
 						<Route path="/start" component={Start} />
 						<Route component={Error} />
 					</Switch>
@@ -54,6 +57,7 @@ function App() {
 						<Route path="/register" component={Register} />
 						<Route path="/login" component={Login} />
 						<Route path="/verify/:id" component={Verify} />
+						<Route path="/reset/:type/:id" component={Reset} />
 						<Route path="/about" component={About} />
 						<ProtectedRoutes />
 					</Switch>

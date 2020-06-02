@@ -52,8 +52,8 @@ function ProfileUpload(props) {
 			badgeContent={
 				<div>
 					<input id="upload-profile-pic" accept="image/*" type="file" style={{ display: 'none' }} onChange={handleUploadProfile} />
-					<IconButton component="label" htmlFor="upload-profile-pic">
-						<AddCircleTwoTone fontSize="large"></AddCircleTwoTone>
+					<IconButton component="label" htmlFor="upload-profile-pic" title="Upload">
+						<AddCircleTwoTone fontSize="large" />
 					</IconButton>
 				</div>
 			}

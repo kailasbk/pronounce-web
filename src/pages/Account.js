@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField } from '@material-ui/core';
+import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField, useMediaQuery } from '@material-ui/core';
 import { Edit, Save } from '@material-ui/icons';
 import ProfileUpload from '../components/ProfileUpload'
 import Recorder from '../components/Recorder';
@@ -49,6 +49,7 @@ export default function Account() {
 		audiosrc: ''
 	});
 	const [edit, setEdit] = useState(0); // 0 is not editing
+	const bigUsername = useMediaQuery(theme.breakpoints.up('sm'));
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -94,7 +95,7 @@ export default function Account() {
 		}
 		return function cleanup() { controller.abort() }
 	}, [edit, info]);
-  
+
 	function handleLogout(e) {
 		token.clear();
 		history.push('/login', { from: '/' });
@@ -126,6 +127,28 @@ export default function Account() {
 		}
 	}
 
+	// give success feedback later on
+	function handleEmail(e) {
+		fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/email`,
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`
+				}
+			});
+	}
+
+	// give success feedback later on
+	function handlePassword(e) {
+		fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/password`,
+			{
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`
+				}
+			});
+	}
+
 	function Bar(props) {
 		return (
 			<Typography className={styles.bar}>
@@ -140,35 +163,35 @@ export default function Account() {
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Account </Typography>
 			<Divider />
-			<div style={{ position: 'relative', display: 'flex', alignItems: 'center', margin: '20px' }}>
+			<div style={{ position: 'relative', display: 'flex', alignItems: 'center', margin: '10px' }}>
 				<ProfileUpload picturesrc={info.picturesrc} update={updatePicture} />
 				<span className={styles.spacer} />
-				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant="h4">{info.username}</Typography>
-				<IconButton onClick={handleEdit}> {edit ? <Save /> : <Edit />} </IconButton>
+				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant={bigUsername ? 'h4' : 'h5'}>{info.username}</Typography>
+				<IconButton onClick={handleEdit} style={{ padding: '6px' }} title={edit ? 'Save changes' : 'Edit bio'}> {edit ? <Save /> : <Edit />} </IconButton>
 				<span className={styles.spacer} />
 			</div>
 			{edit ?
 				<>
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Firstname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.firstname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, firstname: value })) }} />
 					</Typography >
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Nickname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.nickname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, nickname: value })) }} />
 					</Typography >
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Lastname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.lastname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, lastname: value })) }} />
 					</Typography >
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Pronouns: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.pronouns} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, pronouns: value })) }} />
@@ -195,8 +218,8 @@ export default function Account() {
 			<Divider />
 			<Bar field="Email" value={info.email} />
 			<Divider />
-			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained'> Change Email </Button>
-			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained'> Reset Password </Button>
+			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained' onClick={handleEmail}> Change Email </Button>
+			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.warning.main, color: '#ffffff' }} variant='contained' onClick={handlePassword}> Reset Password </Button>
 			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handleLogout}> Logout </Button>
 		</Paper >
 	);

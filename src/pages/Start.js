@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { makeStyles, Typography, Paper, Button, Divider } from '@material-ui/core';
+import { makeStyles, Typography, Paper, Button, Divider, useTheme } from '@material-ui/core';
 import ProfileUpload from '../components/ProfileUpload';
 import Recorder from '../components/Recorder';
 import fetchUser from '../js/fetchUser.js';
@@ -15,6 +15,7 @@ const useStyles = makeStyles({
 
 function Start() {
 	const styles = useStyles();
+	const theme = useTheme();
 	const [info, setInfo] = useState({
 		username: '',
 		firstname: '',
@@ -69,7 +70,9 @@ function Start() {
 				<Recorder audiosrc={info.audiosrc} update={updateAudio} />
 			</div>
 			<Link to="/" style={{ display: 'flex', textDecoration: 'none', width: '100%', justifyContent: 'center' }}>
-				<Button style={{ maxWidth: '300px', flexBasis: '300px' }} variant="contained" color="secondary">
+				<Button
+					style={{ maxWidth: '300px', flexBasis: '300px', color: '#ffffff', backgroundColor: info.picturesrc && info.audiosrc ? theme.palette.success.main : theme.palette.error.main }}
+					variant="contained">
 					{info.picturesrc && info.audiosrc ?
 						'All set! Continue.'
 						:
