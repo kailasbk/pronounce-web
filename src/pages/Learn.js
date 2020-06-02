@@ -5,9 +5,10 @@ import { Shuffle, AccountCircle, DescriptionOutlined, ThumbUp, ThumbDown, Help, 
 import { useParams } from 'react-router-dom';
 import fetchGroup from '../js/fetchGroup.js';
 import fetchUser from '../js/fetchUser.js';
-import audio from '../js/audio'
-import token from '../js/token.js'
+import audio from '../js/audio';
+import token from '../js/token.js';
 import '../css/pulse.css';
+import EndCard from '../components/EndCard';
 
 function Card(props) {
 	const [answered, setAnswered] = useState(false);
@@ -107,11 +108,11 @@ function Card(props) {
 	}
 
 	function handleCorrect(e) {
-		setAnswered(false);
+		props.advance();
 	}
 
 	function handleWrong(e) {
-		setAnswered(false);
+		props.advance();
 	}
 
 	async function handleFeedback(e) {
@@ -127,7 +128,12 @@ function Card(props) {
 							'Authorization': `Bearer ${token.get()}`
 						},
 						body: data
-					});
+					})
+					.then(res => {
+						if (res.ok) {
+							props.advance();
+						}
+					})
 			});
 	}
 
@@ -189,10 +195,10 @@ function Card(props) {
 					<Divider style={{ width: '100%', maxWidth: '500px', marginTop: '10px', marginBottom: '10px' }} />
 					<Typography> How did you do? </Typography>
 					<div style={{ display: 'flex', width: '100%', maxWidth: '500px' }}>
-						<Button style={{ flexBasis: '25%' }} variant="text" onClick={handleCorrect}> <ThumbUp /> </Button>
-						<Button style={{ flexBasis: '25%' }} variant="text" onClick={handleWrong}> <ThumbDown /> </Button>
-						<Button style={{ flexBasis: '25%' }} variant="text" onClick={() => setAnswered(false)}> <Replay /> </Button>
-						<Button style={{ flexBasis: '25%' }} variant="text" onClick={handleFeedback}> <Help /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" title="Correct" onClick={handleCorrect}> <ThumbUp /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" title="Incorrect" onClick={handleWrong}> <ThumbDown /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" title="Try again" onClick={() => setAnswered(false)}> <Replay /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" title="Ask them" onClick={handleFeedback}> <Help /> </Button>
 					</div>
 				</div>
 			}
@@ -209,7 +215,7 @@ export default function Learn() {
 		picture: true
 	});
 	const [shuffledMembers, setShuffledMembers] = useState([]);
-	const [shuffle, setShuffle] = useState(false);
+	const [shuffle, setShuffle] = useState(0);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -240,8 +246,8 @@ export default function Learn() {
 		if (index + value < 0) {
 			setIndex(0);
 		}
-		else if (index + value > members.length - 1) {
-			setIndex(members.length - 1);
+		else if (index + value > members.length) {
+			setIndex(members.length);
 		}
 		else {
 			setIndex(index + value);
@@ -257,6 +263,15 @@ export default function Learn() {
 		}
 	}
 
+	function handleShuffle(e) {
+		if (shuffle === 0) {
+			setShuffle(1);
+		}
+		else {
+			setShuffle(0);
+		}
+	}
+
 	return (
 		<Paper style={{ padding: '10px', minHeight: '500px', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }} onKeyDown={handleArrows} tabIndex="0">
 			<Typography variant="h5"> Learn </Typography>
@@ -264,14 +279,22 @@ export default function Learn() {
 			<ToggleButtonGroup style={{ marginTop: '10px', justifyContent: 'center' }}>
 				<ToggleButton value="name" selected={settings.name} onClick={() => setSettings(old => ({ ...old, name: !settings.name }))}> <DescriptionOutlined /> </ToggleButton>
 				<ToggleButton value="picture" selected={settings.picture} onClick={() => setSettings(old => ({ ...old, picture: !settings.picture }))}> <AccountCircle /> </ToggleButton>
-				<ToggleButton value="shuffle" selected={shuffle} onClick={() => setShuffle(!shuffle)}> <Shuffle /> </ToggleButton>
-				<ToggleButton disabled value="index" style={{ width: '48px', padding: '0px', color: 'rgba(0, 0, 0, 0.38)' }}> {index + 1} / {members.length} </ToggleButton>
+				<ToggleButton value="shuffle" selected={shuffle > 0} onClick={handleShuffle}> <Shuffle /> </ToggleButton>
+				<ToggleButton disabled value="index" style={{ width: '48px', padding: '0px', color: 'rgba(0, 0, 0, 0.38)' }}> {index + 1} / {members.length + 1} </ToggleButton>
 			</ToggleButtonGroup>
 			{shuffle ?
-				<>{shuffledMembers.map((value, arrayIndex) => <Card username={value} key={value} settings={settings} hidden={index !== arrayIndex} />)}</>
+				<>{shuffledMembers.map((value, arrayIndex) => <Card username={value} key={value} settings={settings} hidden={index !== arrayIndex} advance={() => handleMove(1)} />)}</>
 				:
-				<>{members.map((value, arrayIndex) => <Card username={value} key={value} settings={settings} hidden={index !== arrayIndex} />)}</>
+				<>{members.map((value, arrayIndex) => <Card username={value} key={value} settings={settings} hidden={index !== arrayIndex} advance={() => handleMove(1)} />)}</>
 			}
+			<EndCard hidden={index !== members.length} restart={() => {
+				if (shuffle > 0) {
+					setShuffle(shuffle + 1);
+				}
+				else {
+					setIndex(0);
+				}
+			}} />
 			<div style={{ flexGrow: 1 }} />
 			<ButtonGroup style={{ width: '100%', justifyContent: 'center' }}>
 				<Button style={{ width: '150px' }} onClick={() => handleMove(-1)}> Previous </Button>

@@ -4,8 +4,9 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { Shuffle, AccountCircle, DescriptionOutlined, PlayArrow, Stop } from '@material-ui/icons';
 import { useParams } from 'react-router-dom';
 import fetchGroup from '../js/fetchGroup.js'
-import fetchUser from '../js/fetchUser.js'
-import '../css/flipcard.css'
+import fetchUser from '../js/fetchUser.js';
+import '../css/flipcard.css';
+import EndCard from '../components/EndCard';
 
 function Flashcard(props) {
 	const [flipped, setFlipped] = useState(false);
@@ -124,7 +125,7 @@ export default function Flashcards() {
 		picture: true
 	});
 	const [shuffledMembers, setShuffledMembers] = useState([]);
-	const [shuffle, setShuffle] = useState(false);
+	const [shuffle, setShuffle] = useState(0);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -155,8 +156,8 @@ export default function Flashcards() {
 		if (index + value < 0) {
 			setIndex(0);
 		}
-		else if (index + value > members.length - 1) {
-			setIndex(members.length - 1);
+		else if (index + value > members.length) {
+			setIndex(members.length);
 		}
 		else {
 			setIndex(index + value);
@@ -172,6 +173,15 @@ export default function Flashcards() {
 		}
 	}
 
+	function handleShuffle(e) {
+		if (shuffle === 0) {
+			setShuffle(1);
+		}
+		else {
+			setShuffle(0);
+		}
+	}
+
 	return (
 		<Paper style={{ padding: '10px', minHeight: '500px', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }} onKeyDown={handleArrows} tabIndex="0">
 			<Typography variant="h5"> Flashcards </Typography>
@@ -179,14 +189,22 @@ export default function Flashcards() {
 			<ToggleButtonGroup style={{ marginTop: '10px', justifyContent: 'center' }}>
 				<ToggleButton value="name" selected={settings.name} onClick={() => setSettings(old => ({ ...old, name: !settings.name }))}> <DescriptionOutlined /> </ToggleButton>
 				<ToggleButton value="picture" selected={settings.picture} onClick={() => setSettings(old => ({ ...old, picture: !settings.picture }))}> <AccountCircle /> </ToggleButton>
-				<ToggleButton value="shuffle" selected={shuffle} onClick={() => setShuffle(!shuffle)}> <Shuffle /> </ToggleButton>
-				<ToggleButton disabled value="index" style={{ width: '48px', padding: '0px', color: 'rgba(0, 0, 0, 0.38)' }}> {index + 1} / {members.length} </ToggleButton>
+				<ToggleButton value="shuffle" selected={shuffle > 0} onClick={handleShuffle}> <Shuffle /> </ToggleButton>
+				<ToggleButton disabled value="index" style={{ width: '48px', padding: '0px', color: 'rgba(0, 0, 0, 0.38)' }}> {index + 1} / {members.length + 1} </ToggleButton>
 			</ToggleButtonGroup>
 			{shuffle ?
 				<>{shuffledMembers.map((value, arrayIndex) => <Flashcard username={value} key={value} settings={settings} hidden={index !== arrayIndex} />)}</>
 				:
 				<>{members.map((value, arrayIndex) => <Flashcard username={value} key={value} settings={settings} hidden={index !== arrayIndex} />)}</>
 			}
+			<EndCard flashcard hidden={index !== members.length} restart={() => {
+				if (shuffle > 0) {
+					setShuffle(shuffle + 1);
+				}
+				else {
+					setIndex(0);
+				}
+			}} />
 			<div style={{ flexGrow: 1 }} />
 			<ButtonGroup style={{ width: '100%', justifyContent: 'center' }}>
 				<Button style={{ width: '150px' }} onClick={() => handleMove(-1)}> Previous </Button>
