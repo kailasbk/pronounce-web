@@ -8,24 +8,27 @@ import '../css/pulse.css';
 function Recorder(props) {
 	const theme = useTheme();
 	const [isPlaying, setPlaying] = useState(false);
-	const [isRecording, setRecording] = useState(false);
 	const [recorder, setRecorder] = useState(null);
 	const [audioEl, setAudio] = useState(null);
 	const [previewSource, setPreviewSource] = useState(null);
+	const isRecording = (() => {
+		if (recorder) {
+			if (recorder.state === 'recording') {
+				return true;
+			}
+		}
+		return false;
+	})();
 
 	useEffect(() => {
 		if (props.audiosrc) {
-			setAudio(new Audio(props.audiosrc));
-		}
-	}, [props.audiosrc]);
-
-	useEffect(() => {
-		if (audioEl !== null) {
-			audioEl.onended = (e) => {
+			const audio = new Audio(props.audiosrc);
+			audio.onended = (e) => {
 				setPlaying(false);
 			}
+			setAudio(audio);
 		}
-	}, [audioEl]);
+	}, [props.audiosrc]);
 
 	async function handleUploadAudio(e) {
 		const data = new FormData();
@@ -93,46 +96,32 @@ function Recorder(props) {
 		if (recorder === null) {
 			navigator.mediaDevices.getUserMedia({ audio: true })
 				.then(stream => {
-					setRecorder(new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' }));
-					setRecording(true);
+					const recorder = new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' });
+					recorder.ondataavailable = async (e) => {
+						recorder.stream.getAudioTracks()[0].stop();
+						const array = await e.data.arrayBuffer();
+						const audioBuffer = await audio.ctx.decodeAudioData(array);
+						const truncated = audio.truncateBuffer(audioBuffer);
+						const sourceNode = audio.connectBuffer(truncated);
+						sourceNode.onended = (e) => {
+							setPreviewSource(audio.connectBuffer(sourceNode.buffer));
+							setPlaying(false);
+						}
+						setPreviewSource(sourceNode);
+					};
+					recorder.start();
+					setRecorder(recorder);
 				})
 				.catch(error => {
 					console.log(error);
 					setRecorder(null);
-					setRecording(false);
 				});
 		}
 		else if (isRecording) {
 			recorder.stop();
-			recorder.stream.getAudioTracks()[0].stop();
 			setRecorder(null);
-			setRecording(false);
 		}
 	}
-
-	useEffect(() => {
-		if (recorder !== null) {
-			recorder.ondataavailable = async (e) => {
-				const array = await e.data.arrayBuffer();
-				const audioBuffer = await audio.ctx.decodeAudioData(array);
-				const truncated = audio.truncateBuffer(audioBuffer);
-				setPreviewSource(audio.connectBuffer(truncated));
-			};
-
-			if (isRecording) {
-				recorder.start();
-			}
-		}
-	}, [recorder, isRecording]);
-
-	useEffect(() => {
-		if (previewSource !== null) {
-			previewSource.onended = (e) => {
-				setPreviewSource(audio.connectBuffer(previewSource.buffer));
-				setPlaying(false);
-			}
-		}
-	}, [previewSource]);
 
 	return (
 		<>

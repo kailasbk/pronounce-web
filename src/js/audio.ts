@@ -42,7 +42,7 @@ function truncateBuffer(buffer: AudioBuffer): AudioBuffer {
 }
 
 function connectBuffer(buffer: AudioBuffer): AudioBufferSourceNode {
-	let source = ctx.createBufferSource();
+	const source = ctx.createBufferSource();
 	source.buffer = buffer;
 	source.connect(ctx.destination);
 
@@ -50,7 +50,7 @@ function connectBuffer(buffer: AudioBuffer): AudioBufferSourceNode {
 }
 
 function recordBuffer(buffer: AudioBuffer): Promise<Blob> {
-	let source = ctx.createBufferSource();
+	const source = ctx.createBufferSource();
 	const dest = ctx.createMediaStreamDestination();
 	source.buffer = buffer;
 	source.connect(dest);

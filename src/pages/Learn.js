@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Paper, Typography, Divider, ButtonGroup, Button, Avatar } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Shuffle, AccountCircle, DescriptionOutlined, ThumbUp, ThumbDown, Help } from '@material-ui/icons';
+import { Shuffle, AccountCircle, DescriptionOutlined, ThumbUp, ThumbDown, Help, Replay } from '@material-ui/icons';
 import { useParams } from 'react-router-dom';
 import fetchGroup from '../js/fetchGroup.js';
 import fetchUser from '../js/fetchUser.js';
@@ -12,12 +12,19 @@ import '../css/pulse.css';
 function Card(props) {
 	const [answered, setAnswered] = useState(false);
 	const [info, setInfo] = useState({});
-	const [isRecording, setRecording] = useState(false);
 	const [recorder, setRecorder] = useState(null);
 	const [playing, setPlaying] = useState('');
 	const cardRef = useRef(null);
 	const [answerSource, setAnswerSource] = useState(null);
 	const correctRef = useRef(null);
+	const isRecording = (() => {
+		if (recorder) {
+			if (recorder.state === 'recording') {
+				return true;
+			}
+		}
+		return false;
+	})();
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -37,48 +44,33 @@ function Card(props) {
 		if (recorder === null) {
 			navigator.mediaDevices.getUserMedia({ audio: true })
 				.then(stream => {
-					setRecorder(new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' }));
-					setRecording(true);
+					const recorder = new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' });
+					recorder.ondataavailable = async (e) => {
+						recorder.stream.getAudioTracks()[0].stop();
+						const array = await e.data.arrayBuffer();
+						const audioBuffer = await audio.ctx.decodeAudioData(array);
+						const truncated = audio.truncateBuffer(audioBuffer);
+						const sourceNode = audio.connectBuffer(truncated);
+						sourceNode.onended = (e) => {
+							setAnswerSource(audio.connectBuffer(sourceNode.buffer));
+							setPlaying('');
+						}
+						setAnswerSource(sourceNode);
+						setAnswered(true);
+					};
+					recorder.start();
+					setRecorder(recorder);
 				})
 				.catch(error => {
 					console.log(error);
 					setRecorder(null);
-					setRecording(false);
 				});
 		}
 		else if (isRecording) {
 			recorder.stop();
-			recorder.stream.getAudioTracks()[0].stop();
 			setRecorder(null);
-			setRecording(false);
 		}
 	}
-
-	useEffect(() => {
-		if (recorder !== null) {
-			recorder.ondataavailable = async (e) => {
-				// audio.csvFromBlob(e.data);
-				const array = await e.data.arrayBuffer();
-				const audioBuffer = await audio.ctx.decodeAudioData(array);
-				const truncated = audio.truncateBuffer(audioBuffer);
-				setAnswerSource(audio.connectBuffer(truncated));
-				setAnswered(true);
-			};
-
-			if (isRecording) {
-				recorder.start();
-			}
-		}
-	}, [recorder, isRecording]);
-
-	useEffect(() => {
-		if (answerSource !== null) {
-			answerSource.onended = (e) => {
-				setAnswerSource(audio.connectBuffer(answerSource.buffer));
-				setPlaying('');
-			}
-		}
-	}, [answerSource])
 
 	function handlePlay(name) {
 		if (!playing) {
@@ -184,23 +176,23 @@ function Card(props) {
 							{playing === 'correct' ?
 								<div className="pulse">Playing pronounciation...</div>
 								:
-								(() => {
-									if (info.audiosrc) {
-										return <div>Correct pronounciation</div>
+								<>
+									{info.audiosrc ?
+										<div>Correct pronounciation</div>
+										:
+										<div>No pronounciation</div>
 									}
-									else {
-										return <div>No pronounciation</div>
-									}
-								})()
+								</>
 							}
 						</Button>
 					</ButtonGroup>
 					<Divider style={{ width: '100%', maxWidth: '500px', marginTop: '10px', marginBottom: '10px' }} />
 					<Typography> How did you do? </Typography>
 					<div style={{ display: 'flex', width: '100%', maxWidth: '500px' }}>
-						<Button style={{ flexBasis: '33.333333%' }} variant="text" onClick={handleCorrect}> <ThumbUp /> </Button>
-						<Button style={{ flexBasis: '33.333333%' }} variant="text" onClick={handleWrong}> <ThumbDown /> </Button>
-						<Button style={{ flexBasis: '33.333333%' }} variant="text" onClick={handleFeedback}> <Help /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" onClick={handleCorrect}> <ThumbUp /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" onClick={handleWrong}> <ThumbDown /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" onClick={() => setAnswered(false)}> <Replay /> </Button>
+						<Button style={{ flexBasis: '25%' }} variant="text" onClick={handleFeedback}> <Help /> </Button>
 					</div>
 				</div>
 			}
