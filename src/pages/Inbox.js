@@ -24,15 +24,21 @@ function FeedbackNotification(props) {
 	const [refresh, setRefresh] = useState(0);
 
 	useEffect(() => {
+		const controller = new AbortController();
+
 		fetch(`${process.env.REACT_APP_API_HOST}/learn/feedback/${props.feedback.id}`,
 			{
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token.get()}`
-				}
+				},
+				signal: controller.signal
 			})
 			.then(res => res.json())
 			.then(json => setInfo(json))
+			.catch(err => console.log(err))
+
+		return function cleanup() { controller.abort() }
 	}, [props.feedback.id, refresh]);
 
 	useEffect(() => {
@@ -133,15 +139,21 @@ function Invite(props) {
 	}
 
 	useEffect(() => {
+		const controller = new AbortController();
+
 		fetch(`${process.env.REACT_APP_API_HOST}/invite/${props.invite.id}`,
 			{
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token.get()}`
-				}
+				},
+				signal: controller.signal
 			})
 			.then(res => res.json())
 			.then(json => setInfo(json))
+			.catch(err => console.log(err))
+
+		return function cleanup() { controller.abort() }
 	}, [props.invite.id]);
 
 	useEffect(() => {
@@ -182,15 +194,21 @@ export default function Inbox() {
 	const [refresh, setRefresh] = useState(0);
 
 	useEffect(() => {
+		const controller = new AbortController();
+
 		fetch(`${process.env.REACT_APP_API_HOST}/user/0/inbox`,
 			{
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token.get()}`
-				}
+				},
+				signal: controller.signal
 			})
 			.then(res => res.json())
 			.then(json => setInbox(json))
+			.catch(err => console.log(err))
+
+		return function cleanup() { controller.abort() }
 	}, [refresh]);
 
 	return (
