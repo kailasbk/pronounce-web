@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop } from '@material-ui/core';
+import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop, useTheme } from '@material-ui/core';
 import Member from '../components/Member';
 import Invite from '../components/Invite';
 import token from '../js/token.js';
@@ -42,6 +42,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Group() {
 	const styles = useStyles();
+	const theme = useTheme();
 	const { id } = useParams();
 	const history = useHistory();
 	const [groups, setGroups] = useState([
@@ -181,13 +182,13 @@ export default function Group() {
 			</div>
 			<Divider style={{ marginBottom: '10px' }} />
 			<div className={styles.actionBar}>
-				<Button color="primary" variant="contained" className={styles.button}>
+				<Button style={{ backgroundColor: theme.palette.success.main }} variant="contained" className={styles.button}>
 					<Link to={`/flashcards/${id}`} style={{ all: 'inherit' }}> Flashcards </Link>
 				</Button>
-				<Button color="primary" variant="contained" className={styles.button}>
+				<Button style={{ backgroundColor: theme.palette.warning.main }} variant="contained" className={styles.button}>
 					<Link to={`/learn/${id}`} style={{ all: 'inherit' }}> Learn </Link>
 				</Button>
-				<Button color="secondary" variant="contained" className={styles.button} href={`mailto: ${emails.join(';')}`}> Email </Button>
+				<Button style={{ backgroundColor: theme.palette.info.main }} variant="contained" className={styles.button} href={`mailto: ${emails.join(';')}`}> Email </Button>
 			</div >
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>
@@ -197,11 +198,11 @@ export default function Group() {
 				}
 			</div>
 			<Divider />
-			<Grid container spacing={2} className={styles.members}>
+			<Grid container spacing={1} className={styles.members}>
 				<Member owner username={group.owner} key={group.owner} />
 				{group.members.map(member => <Member username={member} index={member} key={member} />)}
 			</Grid>
-			<Backdrop open={backdrop} style={{ zIndex: 1000 }}> <Invite handleClose={(e) => setBackdrop(false)} id={id} /> </Backdrop>
+			<Backdrop open={backdrop} style={{ zIndex: 1000 }}> <Invite close={(e) => setBackdrop(false)} id={id} /> </Backdrop>
 		</Paper >
 	)
 }

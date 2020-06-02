@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme, Button, ButtonGroup } from '@material-ui/core';
-import { PlayArrow, Stop, RecordVoiceOver, Publish, DeleteForever, FiberManualRecord } from '@material-ui/icons';
+import { PlayArrow, Stop, Publish, DeleteForever, FiberManualRecord, Mic } from '@material-ui/icons';
 import token from '../js/token.js';
 import audio from '../js/audio';
 import '../css/pulse.css';
@@ -126,15 +126,15 @@ function Recorder(props) {
 	return (
 		<>
 			<ButtonGroup style={{ maxWidth: '300px', minWidth: '166px', marginTop: '5px', marginBottom: '5px', flexBasis: '50%', flexGrow: 2 }}>
-				<Button style={{ width: '50%' }} color={audioEl || previewSource ? 'primary' : 'secondary'} variant='contained' onClick={handlePlaying}>
+				<Button style={{ width: '50%' }} color={audioEl || previewSource ? 'primary' : 'secondary'} variant='contained' onClick={handlePlaying} title={isPlaying ? 'Pause' : 'Play'}>
 					{isPlaying ? <Stop /> : <PlayArrow />}
 				</Button>
 				{!previewSource ?
-					<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord}>
+					<Button style={{ width: '50%' }} color='primary' variant='contained' onClick={handleRecord} title="Record">
 						{isRecording ?
 							<FiberManualRecord className="pulse" />
 							:
-							<RecordVoiceOver />
+							<Mic />
 						}
 					</Button>
 					:

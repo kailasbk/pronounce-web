@@ -167,31 +167,31 @@ export default function Account() {
 				<ProfileUpload picturesrc={info.picturesrc} update={updatePicture} />
 				<span className={styles.spacer} />
 				<Typography className={!info.username ? styles.skeletonUsername : ''} style={{ display: 'inline-block' }} variant={bigUsername ? 'h4' : 'h5'}>{info.username}</Typography>
-				<IconButton onClick={handleEdit} style={{ padding: '6px' }}> {edit ? <Save /> : <Edit />} </IconButton>
+				<IconButton onClick={handleEdit} style={{ padding: '6px' }} title={edit ? 'Save changes' : 'Edit bio'}> {edit ? <Save /> : <Edit />} </IconButton>
 				<span className={styles.spacer} />
 			</div>
 			{edit ?
 				<>
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Firstname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.firstname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, firstname: value })) }} />
 					</Typography >
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Nickname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.nickname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, nickname: value })) }} />
 					</Typography >
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Lastname: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.lastname} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, lastname: value })) }} />
 					</Typography >
 					<Divider />
-					<Typography className={styles.bar}>
+					<Typography className={styles.bar} component="div">
 						<span>Pronouns: </span>
 						<span className={styles.spacer} />
 						<TextField value={info.pronouns} onChange={(e) => { const value = e.target.value; setInfo(old => ({ ...old, pronouns: value })) }} />
@@ -219,7 +219,7 @@ export default function Account() {
 			<Bar field="Email" value={info.email} />
 			<Divider />
 			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained' onClick={handleEmail}> Change Email </Button>
-			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handlePassword}> Reset Password </Button>
+			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.warning.main, color: '#ffffff' }} variant='contained' onClick={handlePassword}> Reset Password </Button>
 			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handleLogout}> Logout </Button>
 		</Paper >
 	);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Divider, Typography, Grid, Avatar, Badge, IconButton } from '@material-ui/core';
-import { PlayArrow, Stop, Star } from '@material-ui/icons';
+import { Star, PlayArrowRounded, Stop } from '@material-ui/icons';
 import fetchUser from '../js/fetchUser.js'
 
 function Member(props) {
@@ -15,6 +15,7 @@ function Member(props) {
 		audiosrc: ''
 	});
 	const [isPlaying, setPlaying] = useState(false);
+	const [audio, setAudio] = useState(null);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -34,9 +35,18 @@ function Member(props) {
 		return function cleanup() { controller.abort() };
 	}, [props.username]);
 
-	function handlePlaying(e) {
+	useEffect(() => {
 		if (info.audiosrc) {
-			const audio = document.getElementById(`audio-${props.username}`);
+			const el = new Audio(info.audiosrc);
+			el.onended = () => {
+				setPlaying(false);
+			}
+			setAudio(el);
+		}
+	}, [info.audiosrc]);
+
+	function handlePlaying(e) {
+		if (audio) {
 			if (isPlaying) {
 				audio.pause();
 				audio.currentTime = 0;
@@ -50,34 +60,23 @@ function Member(props) {
 
 	return (
 		<Grid item xs={12} sm={6} md={4}>
-			<Card style={{ padding: '10px', paddingTop: '0', position: 'relative' }}>
+			<Card style={{ padding: '10px', position: 'relative' }}>
 				{props.owner &&
 					<Star style={{ position: 'absolute', top: '10px', right: '10px' }} />
 				}
 				<div style={{ display: 'flex', alignItems: 'center' }}>
 					<Badge
-						style={{ margin: '10px', marginLeft: '0px' }}
-						overlap="circle"
-						anchorOrigin={{
-							vertical: 'bottom',
-							horizontal: 'right',
-						}}
-						badgeContent={
-							<div>
-								{info.audiosrc &&
-									<audio src={info.audiosrc} id={'audio-' + props.username} onEnded={() => setPlaying(false)}></audio>
-								}
-								<IconButton onClick={handlePlaying} style={{ padding: '3px' }}>
-									{isPlaying ? <Stop /> : <PlayArrow />}
-								</IconButton>
-							</div>
-						}
+						style={{ marginRight: '10px', position: 'relative' }}
 					>
-						<Avatar src={info.picturesrc} style={{ width: '60px', height: '60px' }} />
+						<Avatar src={info.picturesrc} style={{ width: '80px', height: '80px' }} />
+
 					</Badge>
+					<IconButton onClick={handlePlaying} style={{ position: 'absolute', fontSize: '4rem', color: 'rgba(255, 255, 255, .5)', width: '80px', height: '80px' }}>
+						{isPlaying ? <Stop fontSize="inherit" color="inherit" /> : <PlayArrowRounded fontSize="inherit" color="inherit" />}
+					</IconButton>
 					<Typography variant="h6"> {info.firstname} {info.nickname ? `"${info.nickname}"` : ''} {info.lastname} </Typography>
 				</div >
-				<Divider style={{ marginBottom: '10px' }} />
+				<Divider style={{ marginTop: '10px', marginBottom: '10px' }} />
 				{info.pronouns &&
 					<Typography> {info.pronouns} </Typography>
 				}

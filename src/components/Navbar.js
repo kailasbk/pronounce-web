@@ -41,27 +41,27 @@ export default function Navbar() {
 					<div className={styles.navbarSpacer} />
 					<div className={styles.iconButtons}>
 						<Link to="/">
-							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
+							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }} title="Home">
 								<HomeOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
 						<Link to="/group">
-							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
+							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }} title="Groups">
 								<PeopleAltOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
 						<Link to="/inbox">
-							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
+							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }} title="Inbox">
 								<MailOutline fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
 						<Link to="/account">
-							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
+							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }} title="My Account">
 								<AccountCircleOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
 						<Link to="/about">
-							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }}>
+							<IconButton style={{ color: "#ffffff", fontSize: '2rem' }} title="About">
 								<InfoOutlined fontSize="inherit" color="inherit" />
 							</IconButton>
 						</Link>
