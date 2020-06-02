@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Divider, ButtonGroup, IconButton, makeStyles, Avatar, List, ListItem } from '@material-ui/core';
-import { Check, Clear } from '@material-ui/icons';
+import { Check, Clear, Close } from '@material-ui/icons';
 import Feedback from './Feedback';
 import token from '../js/token.js';
 
@@ -21,6 +21,7 @@ function FeedbackNotification(props) {
 	const [info, setInfo] = useState({});
 	const [src, setSrc] = useState('');
 	const [open, setOpen] = useState(false);
+	const [refresh, setRefresh] = useState(0);
 
 	useEffect(() => {
 		fetch(`${process.env.REACT_APP_API_HOST}/learn/feedback/${props.feedback.id}`,
@@ -32,7 +33,7 @@ function FeedbackNotification(props) {
 			})
 			.then(res => res.json())
 			.then(json => setInfo(json))
-	}, [props.feedback.id]);
+	}, [props.feedback.id, refresh]);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -54,6 +55,18 @@ function FeedbackNotification(props) {
 		return function cleanup() { controller.abort() }
 	}, [info])
 
+	function handleDelete(e) {
+		e.stopPropagation();
+		fetch(`${process.env.REACT_APP_API_HOST}/learn/feedback/${props.feedback.id}`,
+			{
+				method: 'DELETE',
+				headers: {
+					'Authorization': `Bearer ${token.get()}`
+				}
+			})
+			.then(res => props.refresh());
+	}
+
 	return (
 		<>
 			<ListItem button onClick={(e) => setOpen(true)}>
@@ -64,9 +77,13 @@ function FeedbackNotification(props) {
 					<Typography style={{ fontSize: '20px' }}>{info.askername} has requested feedback on their pronounciation of your name</Typography>
 				}
 				<Typography style={{ fontSize: '20px' }}></Typography>
+				<span style={{ flexGrow: 1 }} />
+				<IconButton onClick={handleDelete}>
+					<Close />
+				</IconButton>
 			</ListItem>
 			{open &&
-				<Feedback id={props.feedback.id} close={() => setOpen(false)} />
+				<Feedback id={props.feedback.id} info={info} close={() => setOpen(false)} refresh={() => setRefresh(refresh + 1)} />
 			}
 		</>
 	)
@@ -197,8 +214,8 @@ export default function Inbox() {
 						}
 					})
 					:
-					<ListItem button>
-						<Typography> Empty inbox :(</Typography>
+					<ListItem button onClick={() => setRefresh(refresh + 1)}>
+						<Typography> Nothing here. Refresh?</Typography>
 					</ListItem>
 				}
 			</List>
