@@ -80,7 +80,7 @@ export default function Reset() {
 			<div>
 				<TextField id="value" placeholder={`New ${type}`} type={type} variant="outlined" className={styles.item} value={value} onChange={(e) => setValue(e.target.value)}></TextField>
 				<TextField placeholder={`Confirm ${type}`} type={type} variant="outlined" className={styles.item} value={confirm} onChange={(e) => setConfirm(e.target.value)}></TextField>
-				<Button className={styles.item} onClick={handleSubmit}> Sumbmit </Button>
+				<Button className={styles.item} onClick={handleSubmit}> Submit </Button>
 			</div>
 		</Paper>
 	);

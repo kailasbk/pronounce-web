@@ -50,6 +50,7 @@ export default function Account() {
 	});
 	const [edit, setEdit] = useState(0); // 0 is not editing
 	const bigUsername = useMediaQuery(theme.breakpoints.up('sm'));
+	const [reset, setReset] = useState(false);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -129,24 +130,30 @@ export default function Account() {
 
 	// give success feedback later on
 	function handleEmail(e) {
-		fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/email`,
-			{
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${token.get()}`
-				}
-			});
+		if (!reset) {
+			setReset(true);
+			fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/email`,
+				{
+					method: 'POST',
+					headers: {
+						'Authorization': `Bearer ${token.get()}`
+					}
+				})
+		}
 	}
 
 	// give success feedback later on
 	function handlePassword(e) {
-		fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/password`,
-			{
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${token.get()}`
-				}
-			});
+		if (!reset) {
+			setReset(true);
+			fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/password`,
+				{
+					method: 'POST',
+					headers: {
+						'Authorization': `Bearer ${token.get()}`
+					}
+				})
+		}
 	}
 
 	function Bar(props) {

@@ -24,6 +24,8 @@ export default function Login() {
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
 	const [submitted, setSubmitted] = useState(0);
+	const [resent, setResent] = useState(false);
+	const [reset, setReset] = useState(false);
 
 	useEffect(() => {
 		if (token.get() || token.getRefresh()) {
@@ -110,7 +112,18 @@ export default function Login() {
 
 	function handleResend(e) {
 		e.preventDefault();
-		fetch(`${process.env.REACT_APP_API_HOST}/account/resend/${username}`, { method: 'POST' });
+		if (!resent) {
+			setResent(true);
+			fetch(`${process.env.REACT_APP_API_HOST}/account/resend/${username}`, { method: 'POST' })
+		}
+	}
+
+	function handleReset(e) {
+		e.preventDefault();
+		if (!reset) {
+			setReset(true);
+			fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/password/${username}`, { method: 'POST' })
+		}
 	}
 
 	if (submitted) {
@@ -131,8 +144,12 @@ export default function Login() {
 		<Paper className={styles.pane}>
 			<Typography variant="h5"> Login </Typography>
 			<Divider />
-			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }} > The username / password combination was invalid </Alert>
-			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }} > The account has not been verified. <a onClick={handleResend} href='/'>Resend?</a> </Alert>
+			<Alert severity="error" style={error === 'wrong' ? { marginTop: '10px' } : { display: 'none' }}>
+				The username / password combination was invalid. <a onClick={handleReset} href='/'>Forgot your password?</a>
+			</Alert>
+			<Alert severity="warning" style={error === 'unverified' ? { marginTop: '10px' } : { display: 'none' }}>
+				The account has not been verified. <a onClick={handleResend} href='/'>Resend?</a>
+			</Alert>
 			<TextField className={styles.input} value={username} error={error === 'eUser' ? true : false} onChange={(e) => setUsername(e.target.value)} label="Username" variant="outlined"
 				onKeyPress={(e) => { if (e.key === 'Enter') { document.getElementById('password').focus() } }} />
 			<TextField className={styles.input} id="password" value={password} error={error === 'ePass' ? true : false} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" variant="outlined"

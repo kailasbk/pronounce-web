@@ -188,7 +188,9 @@ export default function Group() {
 				<Button style={{ backgroundColor: theme.palette.warning.main }} variant="contained" className={styles.button}>
 					<Link to={`/learn/${id}`} style={{ all: 'inherit' }}> Learn </Link>
 				</Button>
-				<Button style={{ backgroundColor: theme.palette.info.main }} variant="contained" className={styles.button} href={`mailto: ${emails.join(';')}`}> Email </Button>
+				{id !== 'all' &&
+					<Button style={{ backgroundColor: theme.palette.info.main }} variant="contained" className={styles.button} href={`mailto: ${emails.join(';')}`}> Email </Button>
+				}
 			</div >
 			<Divider style={{ marginTop: '10px' }} />
 			<div className={styles.membersBar}>
