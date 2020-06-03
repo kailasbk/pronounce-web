@@ -71,7 +71,7 @@ function Member(props) {
 						<Avatar src={info.picturesrc} style={{ width: '80px', height: '80px' }} />
 
 					</Badge>
-					<IconButton onClick={handlePlaying} style={{ position: 'absolute', fontSize: '4rem', color: 'rgba(255, 255, 255, .5)', width: '80px', height: '80px' }}>
+					<IconButton onClick={handlePlaying} style={{ position: 'absolute', fontSize: '4rem', color: 'rgba(255, 255, 255, .7)', width: '80px', height: '80px' }}>
 						{isPlaying ? <Stop fontSize="inherit" color="inherit" /> : <PlayArrowRounded fontSize="inherit" color="inherit" />}
 					</IconButton>
 					<Typography variant="h6"> {info.firstname} {info.nickname ? `"${info.nickname}"` : ''} {info.lastname} </Typography>
