@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Paper, Typography, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles({
@@ -32,7 +32,7 @@ export default function Verify() {
 				:
 				<>
 					{done === 1 ?
-						<Typography> Verification success! </Typography>
+						<Typography> Verification success! <Link to="/login"> Login here. </Link> </Typography>
 						:
 						<Typography> Verification failed! </Typography>
 					}
