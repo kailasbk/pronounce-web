@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { makeStyles, Paper, Divider, Typography, Grid, Button, Menu, MenuItem, TextField, Backdrop, useTheme } from '@material-ui/core';
 import Member from '../components/Member';
-import Invite from '../components/Invite';
+import Invite from '../backdrops/Invite';
 import token from '../js/token.js';
 import fetchGroup from '../js/fetchGroup';
 

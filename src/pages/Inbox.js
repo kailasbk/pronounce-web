@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Divider, ButtonGroup, IconButton, makeStyles, Avatar, List, ListItem } from '@material-ui/core';
 import { Check, Clear, Close } from '@material-ui/icons';
-import Feedback from './Feedback';
+import Feedback from '../backdrops/Feedback';
 import token from '../js/token.js';
 
 const useStyles = makeStyles(theme => ({
