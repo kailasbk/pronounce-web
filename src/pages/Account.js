@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField, useMediaQuery } from '@material-ui/core';
-import { Edit, Save } from '@material-ui/icons';
+import { makeStyles, useTheme, Paper, Divider, Typography, Button, IconButton, TextField, useMediaQuery, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+import { Edit, Save, Close } from '@material-ui/icons';
 import ProfileUpload from '../components/ProfileUpload'
 import Recorder from '../components/Recorder';
 import token from '../js/token.js';
@@ -9,7 +10,7 @@ import fetchUser from '../js/fetchUser.js';
 
 const useStyles = makeStyles(theme => ({
 	pane: {
-		padding: '10px'
+		padding: '10px',
 	},
 	bar: {
 		minHeight: '40px',
@@ -51,6 +52,7 @@ export default function Account() {
 	const [edit, setEdit] = useState(0); // 0 is not editing
 	const bigUsername = useMediaQuery(theme.breakpoints.up('sm'));
 	const [reset, setReset] = useState(false);
+	const [snackbar, setSnackbar] = useState('');
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -67,6 +69,17 @@ export default function Account() {
 
 		return function cleanup() { controller.abort() }
 	}, []);
+
+	useEffect(() => {
+		let timeout;
+		if (reset) {
+			timeout = setTimeout(() => {
+				setReset(false);
+			}, 10000);
+		}
+
+		return function cleanup() { clearTimeout(timeout) }
+	}, [reset])
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -130,6 +143,7 @@ export default function Account() {
 
 	// give success feedback later on
 	function handleEmail(e) {
+		setSnackbar('');
 		if (!reset) {
 			setReset(true);
 			fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/email`,
@@ -139,11 +153,23 @@ export default function Account() {
 						'Authorization': `Bearer ${token.get()}`
 					}
 				})
+				.then(res => {
+					if (res.ok) {
+						setSnackbar('success');
+					}
+					else {
+						setSnackbar('failed');
+					}
+				})
+		}
+		else {
+			setSnackbar('timeout');
 		}
 	}
 
 	// give success feedback later on
 	function handlePassword(e) {
+		setSnackbar('');
 		if (!reset) {
 			setReset(true);
 			fetch(`${process.env.REACT_APP_API_HOST}/account/reset/new/password`,
@@ -153,7 +179,22 @@ export default function Account() {
 						'Authorization': `Bearer ${token.get()}`
 					}
 				})
+				.then(res => {
+					if (res.ok) {
+						setSnackbar('success');
+					}
+					else {
+						setSnackbar('failed');
+					}
+				})
 		}
+		else {
+			setSnackbar('timeout');
+		}
+	}
+
+	function handleSnackbar(e) {
+		setSnackbar('');
 	}
 
 	function Bar(props) {
@@ -225,6 +266,50 @@ export default function Account() {
 			<Divider />
 			<Bar field="Email" value={info.email} />
 			<Divider />
+			<Snackbar open={snackbar !== ''} autoHideDuration={9000} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+				{(() => {
+					switch (snackbar) {
+						case 'success':
+							return (
+								<Alert
+									severity="success"
+									action={
+										<IconButton color="inherit" size="small" onClick={handleSnackbar}>
+											<Close />
+										</IconButton>
+									}>
+									Successfully sent reset request!
+								</Alert>
+							);
+						case 'failed':
+							return (
+								<Alert
+									severity="error"
+									action={
+										<IconButton color="inherit" size="small" onClick={handleSnackbar}>
+											<Close />
+										</IconButton>
+									}>
+									Error sending request!
+								</Alert>
+							);
+						case 'timeout':
+							return (
+								<Alert
+									severity="warning"
+									action={
+										<IconButton color="inherit" size="small" onClick={handleSnackbar}>
+											<Close />
+										</IconButton>
+									}>
+									Can only send a request every 10s
+								</Alert>
+							);
+						default:
+							return;
+					}
+				})()}
+			</Snackbar>
 			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.info.main, color: '#ffffff' }} variant='contained' onClick={handleEmail}> Change Email </Button>
 			<Button style={{ width: '100%', marginTop: '10px', backgroundColor: theme.palette.warning.main, color: '#ffffff' }} variant='contained' onClick={handlePassword}> Reset Password </Button>
 			<Button style={{ width: '100%', marginTop: '10px' }} color='secondary' variant='contained' onClick={handleLogout}> Logout </Button>
